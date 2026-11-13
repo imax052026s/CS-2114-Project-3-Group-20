@@ -37,10 +37,10 @@ These tests create a `Model`, load it with packages, process them, shelve them, 
 
 ### What changed from the specification?
 
-**Queue and Node.** The spec said singly linked, with `enqueue(null)` returning `false`. Our implementation matches the spec, and the tests check that `enqueue(null)` returns `false`. We added `clear()`, which the spec did not list, so queues can be emptied when needed. `Node` is a private nested class inside `Queue`, matching the spec: only `Queue` can create nodes. 
+**Queue and Node.** We added `clear()`, which the spec did not list, so queues can be emptied when needed.
 
 **Package.**
-- The spec called for a `Stamp` class (`addStamp(Stamp)`) and arrays of size 20 for `stampsApplied` and `actualStamps`. We used plain `String` stamp names (`addStamp(String)`), because stamps only need a name, and sized both arrays to 10 slots. `addStamp` returns `false` for null or blank names or when the 10 stamp slots are full. 
+- The spec called for a `Stamp` class (`addStamp(Stamp)`) and arrays of size 20 for `stampsApplied` and `actualStamps`. We used plain `String` stamp names (`addStamp(String)`), because stamps only need a name, and sized both arrays to 10 slots. `addStamp` returns `false` for null or blank names or when the 10 stamp slots are full. This change occurred because we realized a package should only have 6 stamps at most and does not need 20 slots for stamps.
 - We added a `numStamps` counter and a `viewStamps()` method (not listed in the spec) so shelf inspection can display the stamps applied to a package as a comma-separated list.
 - `gradeStamps` follows the spec (1 point per correct stamp, minus 1 point per extra or missed stamp). Unlike the spec's method note claiming an empty `stampsApplied` list returns 0, an unstamped safe package loses 1 point per missed stamp to match the scoring rules. An unsafe package that is processed scores -5, which is in our instructions but was not in the method spec. 
 
@@ -49,7 +49,6 @@ These tests create a `Model`, load it with packages, process them, shelve them, 
 - The spec did not list `startProcessing`, `denyPackage` or `finishProcessing`, but the MVP flow needs them. `startProcessing` returns `boolean` so an empty queue cannot hand back a null package.
 - In the spec, `startDay()` initialized `unprocessedPackages` with random packages and cleared `processedPackages` and `shelves`. Currently, `startDay()` calls `checkQueue()` and clears `currentPackage` without wiping existing queues or shelves. 
 - In the spec, `viewShelf(int, int)` returned a package's contents, size, weight, and destination; our implementation calls `viewStamps()` to display the stamps applied to the shelved package.
-- `removeFromShelf` fails only for a bad position or an empty slot, as the spec says. 
 
 **Controller.**
 - The spec listed `private Controller()` and only a `scanner` field. We made `Controller()` `public` so `main` and tests can instantiate it, stored `view` and `model` as fields, and moved the game loop into `private void run()`. 
@@ -59,7 +58,7 @@ These tests create a `Model`, load it with packages, process them, shelve them, 
 
 **View.** The spec's system diagram showed `View<T>`, which we implemented as a non-generic `View` class. Beyond the 6 print methods in the spec, we added prompt and feedback helpers (`printIntError`, `printLeaveGame`, `printReadShelfNumber`, `printReadShelveNumber`, `printShelves`, `printPackage`, `printMessage`) as well as typed print methods (`printWeight`, `printVolume`, `printDestination`, `printContents`, `printStampAdded`, `printScore`, `printFinalScore`). `Controller` calls `printFinalScore` on exit and routes package details and daily scores through `printPackage` and `printMessage`. 
 
-**Where validation lives.** It is where the spec put it: menu letters and numbers are checked in the Controller, and shelf, stamp-capacity and empty-queue checks are in the Model and Package. The one addition is that `Package.addStamp` also rejects null and blank names.
+**Where validation lives.** The `Package.addStamp` method now also rejects null and blank names.
 
 **Tests.** The spec's test plan listed an `OutOfMemoryError` case for the Model constructor and a "package generation fails" case in `addToQueue()`. We cannot force either, so they are not tested directly. The "shelves are null" cases are tested by setting the field to null with reflection. All test classes (`QueueTest`, `PackageTest`, `ModelTest`, `ViewTest`, and `ControllerTest`) extend `student.TestCase`. 
 
@@ -79,10 +78,8 @@ We listed two unknowns: how to build a real-time clock for the player, and how t
 
 - No timer or timed day (stretch goal).
 - `Model.startDay()` only calls `checkQueue()` once (adding 1 package if fewer than 3 are queued) rather than refilling the queue to 3 packages at the start of a new day, and `Model` does not yet manage how leftover processed or shelved packages carry over between days.
-- Only the first 30 processed packages are scored, but there is no visible "vehicle full" step.
 - Denying a package is free. Denying a safe package costs nothing and denying an unsafe package earns nothing, so denying everything scores 0.
 - The MVP says stamping happens before the user continues, but "finish" is allowed with zero stamps.
-- Untested cases: the Model constructor `OutOfMemoryError` case and forcing package generation to fail.
 
 ## Next Steps
 
@@ -92,7 +89,6 @@ We listed two unknowns: how to build a real-time clock for the player, and how t
 2. Add a score effect for denying packages: a penalty for denying a safe package and a small reward for correctly denying an unsafe one (`Model.denyPackage`, `Package.isSafe`). This closes the "deny everything" loophole.
 3. Show a clear end-of-day summary: how many packages were scored and how many are left over (`View`, `Controller.run`).
 4. Decide whether finishing with no stamps should be blocked, and update tests to match.
-5. Run all tests in Eclipse and fix style warnings.
 
 ### Our change feature: priority processing
 

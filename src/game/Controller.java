@@ -319,7 +319,7 @@ public class Controller
                             shelve = readIntOption(1, 5) - 1;
                             if (shelve != -2)
                             {
-                                shelfSelected = true;
+                                shelveSelected = true;
                             }
                         }
                         view.printPackage(model.viewShelf(shelf, shelve));
@@ -345,7 +345,7 @@ public class Controller
                             shelve = readIntOption(1, 5) - 1;
                             if (shelve != -2)
                             {
-                                shelfSelected = true;
+                                shelveSelected = true;
                             }
                         }
                         if (!model.addToShelf(shelf, shelve))
@@ -375,7 +375,7 @@ public class Controller
                             shelve = readIntOption(1, 5) - 1;
                             if (shelve != -2)
                             {
-                                shelfSelected = true;
+                                shelveSelected = true;
                             }
                         }
                         if (!model.removeFromShelf(shelf, shelve))

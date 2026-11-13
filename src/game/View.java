@@ -127,9 +127,9 @@ public class View
      */
     public void printIntError()
     {
-        System.out.print(
+        System.out.println(
             "The entered value is not valid. "
-                + "Please enter a whole number in the range shown: ");
+                + "Please enter a whole number in the range shown.");
     }
 
     // ~ Information ...........................................................
