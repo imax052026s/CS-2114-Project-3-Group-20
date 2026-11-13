@@ -1,19 +1,28 @@
 package game;
 
+// -------------------------------------------------------------------------
 /**
- * A generic queue implemented as a LinkedChain.
+ * A generic first-in, first-out queue implemented as a singly linked chain.
+ * New entries are added to the back and removed from the front.
  *
  * @param <T>
  *            the type of entries stored in the queue
+ * @author Group 20
+ * @version 2026.11.12
  */
 public class Queue<T>
 {
+    // ~ Fields ................................................................
+
     private Node<T> firstNode;
     private Node<T> lastNode;
     private int numberOfEntries;
 
+    // ~ Constructors ..........................................................
+
+    // ----------------------------------------------------------
     /**
-     * Creates an empty queue
+     * Creates an empty queue.
      */
     public Queue()
     {
@@ -23,22 +32,23 @@ public class Queue<T>
     }
 
 
+    // ~ Public Methods ........................................................
+
+    // ----------------------------------------------------------
     /**
      * Adds a new entry to the back of this queue.
      *
      * @param newEntry
-     *            the object to be added; must not be null
-     * @return true
-     * @throws IllegalArgumentException
-     *             if newEntry is null
+     *            the object to be added
+     * @return true if the entry was added, false if newEntry is null
      */
     public boolean enqueue(T newEntry)
     {
         if (newEntry == null)
         {
-            throw new IllegalArgumentException("Cannot add null to chain");
+            return false;
         }
-        Node<T> newNode = new Node<T>(lastNode, newEntry, null);
+        Node<T> newNode = new Node<T>(newEntry);
         if (isEmpty())
         {
             firstNode = newNode;
@@ -53,52 +63,50 @@ public class Queue<T>
     }
 
 
+    // ----------------------------------------------------------
     /**
-     * Removes and returns the entry from the front of this queue.
+     * Removes and returns the entry at the front of this queue.
      *
      * @return the removed entry, or null if the queue is empty
      */
     public T dequeue()
     {
-        if (firstNode != null)
+        if (firstNode == null)
         {
-            T entry = firstNode.data;
-            firstNode = firstNode.next;
-
-            if (firstNode == null)
-            {
-                lastNode = null;
-            }
-            else
-            {
-                firstNode.prev = null;
-            }
-            numberOfEntries--;
-            return entry;
+            return null;
         }
-        return null;
+        T entry = firstNode.data;
+        firstNode = firstNode.next;
+        if (firstNode == null)
+        {
+            lastNode = null;
+        }
+        numberOfEntries--;
+        return entry;
     }
 
 
+    // ----------------------------------------------------------
     /**
-     * Returns the entry from the front of this queue without removing.
-     * 
+     * Returns the entry at the front of this queue without removing it.
+     *
      * @return the first entry, or null if the queue is empty
      */
     public T peek()
     {
-        if (firstNode != null)
+        if (firstNode == null)
         {
-            return firstNode.data;
+            return null;
         }
-        return null;
+        return firstNode.data;
     }
 
 
+    // ----------------------------------------------------------
     /**
-     * Returns the size of the queue.
-     * 
-     * @return the number of entries in the queue
+     * Returns the number of entries in this queue.
+     *
+     * @return the number of entries
      */
     public int size()
     {
@@ -106,9 +114,10 @@ public class Queue<T>
     }
 
 
+    // ----------------------------------------------------------
     /**
-     * Returns whether or not the queue is empty.
-     * 
+     * Returns whether this queue has no entries.
+     *
      * @return true if the queue is empty
      */
     public boolean isEmpty()
@@ -117,8 +126,9 @@ public class Queue<T>
     }
 
 
+    // ----------------------------------------------------------
     /**
-     * Clears out the queue.
+     * Removes every entry from this queue.
      */
     public void clear()
     {
@@ -127,18 +137,22 @@ public class Queue<T>
         numberOfEntries = 0;
     }
 
+    // ~ Node class ............................................................
+
+    // -------------------------------------------------------------------------
     /**
-     * A node in the chain. Holds one entry and a link to the next node.
+     * A single entry in the chain. Holds one piece of data and a link to the
+     * next node.
      *
      * @param <E>
      *            the type of data held in the node
      */
     private static class Node<E>
     {
-        private E data;        // entry stored in this node
-        private Node<E> next;  // link to the next node, or null
-        private Node<E> prev;  // to the prior node or null
+        private E data;
+        private Node<E> next;
 
+        // ----------------------------------------------------------
         /**
          * Creates a node with the given data and no next node.
          *
@@ -147,21 +161,21 @@ public class Queue<T>
          */
         private Node(E dataPortion)
         {
-            this(null, dataPortion, null);
+            this(dataPortion, null);
         }
 
 
+        // ----------------------------------------------------------
         /**
-         * Creates a node with the given data and next link.
+         * Creates a node with the given data and next node.
          *
          * @param dataPortion
          *            the entry to store
          * @param nextNode
          *            the node that follows this one
          */
-        private Node(Node<E> prevNode, E dataPortion, Node<E> nextNode)
+        private Node(E dataPortion, Node<E> nextNode)
         {
-            prev = prevNode;
             data = dataPortion;
             next = nextNode;
         }
