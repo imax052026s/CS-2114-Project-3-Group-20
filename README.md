@@ -92,7 +92,7 @@ We listed two unknowns: how to build a real-time clock for the player, and how t
 2. Add a score effect for denying packages: a penalty for denying a safe package and a small reward for correctly denying an unsafe one (`Model.denyPackage`, `Package.isSafe`). This closes the "deny everything" loophole.
 3. Show a clear end-of-day summary: how many packages were scored and how many are left over (`View`, `Controller.playDay`).
 4. Decide whether finishing with no stamps should be blocked, and update tests to match.
-5. Run all tests in Eclipse and on Web-CAT, and fix style warnings.
+5. Run all tests in Eclipse and fix style warnings.
 
 ### Our change feature: priority processing
 
@@ -126,7 +126,7 @@ A customer drops off a priority package in person and asks for it to be processe
 | `Queue.enqueueFront` and its tests | Nikita |
 | `Model.addPriorityPackage`, carry-over of leftover packages, deny scoring and their tests | Sarah |
 | `Controller` and `View` changes, end-of-day summary, `ControllerTest` and `ViewTest` updates | Max |
-| Running everything on Web-CAT and final README update | All |
+| Final README update | All |
 
 ## Attribution
 
