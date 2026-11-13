@@ -129,7 +129,7 @@ A customer drops off a priority package in person and asks for it to be processe
 | File | Who | How |
 | --- | --- | --- |
 | `Queue.java` (includes nested `Node`) | Nikita | Wrote and revised. |
-| `QueueTest.java` | Sarah | Wrote and revised. |
+| `QueueTest.java` | Nikita | Wrote and revised. |
 | `Package.java` | Sarah | Wrote and revised. |
 | `PackageTest.java` | Nikita | Wrote and revised. |
 | `Model.java` | Sarah | Wrote and revised.|
