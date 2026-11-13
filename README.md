@@ -37,31 +37,31 @@ These tests create a `Model`, load it with packages, process them, shelve them, 
 
 ### What changed from the specification?
 
-**Queue and Node.** The spec said singly linked, with `enqueue(null)` returning `false`. Our first implementation had a `prev` pointer (doubly linked) and threw an exception on null. We changed it back to match the spec, and the tests now check that `enqueue(null)` returns `false`. We added `clear()`, which the spec did not list, so `Model.startDay()` can reset a queue. `Node` is a private nested class inside `Queue`, which still matches the spec: only `Queue` can create nodes.
+**Queue and Node.** The spec said singly linked, with `enqueue(null)` returning `false`. Our implementation matches the spec, and the tests check that `enqueue(null)` returns `false`. We added `clear()`, which the spec did not list, so queues can be emptied when needed. `Node` is a private nested class inside `Queue`, matching the spec: only `Queue` can create nodes. 
 
 **Package.**
-- The spec called for a `Stamp` class (`addStamp(Stamp)`). We used plain `String` stamp names, because stamps only need a name and a `Stamp` class would have added nothing but a wrapper. `addStamp` returns `false` for null or empty names or when the 20 stamp slots are full.
-- We added two constructors (`Package(Random)` and one taking explicit values) so tests can build known packages and seeded games repeat exactly. We added `isSafe()` and `getNumStamps()`.
-- `gradeStamps` follows the spec (point per correct stamp, minus a point per extra or missed stamp, 0 if nothing was stamped). An unsafe package that is processed scores -5, which is in our instructions but was not in the method spec.
-- Bugs fixed while rewriting: stamps were never counted, the "keep dry" list was misaligned with the contents list, one safe item made a whole package safe, `" Alexandria"` had a leading space, and grading changed the package so a second call gave a different answer.
+- The spec called for a `Stamp` class (`addStamp(Stamp)`) and arrays of size 20 for `stampsApplied` and `actualStamps`. We used plain `String` stamp names (`addStamp(String)`), because stamps only need a name, and sized both arrays to 10 slots. `addStamp` returns `false` for null or blank names or when the 10 stamp slots are full. 
+- We added a `numStamps` counter and a `viewStamps()` method (not listed in the spec) so shelf inspection can display the stamps applied to a package as a comma-separated list.
+- `gradeStamps` follows the spec (1 point per correct stamp, minus 1 point per extra or missed stamp). Unlike the spec's method note claiming an empty `stampsApplied` list returns 0, an unstamped safe package loses 1 point per missed stamp to match the scoring rules. An unsafe package that is processed scores -5, which is in our instructions but was not in the method spec. 
 
 **Model.**
-- The spec had `addStampToPackage` return `void`. It returns `boolean` so the controller can tell the player there is no room.
+- The spec had `addStampToPackage` return `void`. It returns `boolean` so the controller can tell the player there is no room for an additional stamp.
 - The spec did not list `startProcessing`, `denyPackage` or `finishProcessing`, but the MVP flow needs them. `startProcessing` returns `boolean` so an empty queue cannot hand back a null package.
-- We added small read-only methods (`getUnprocessedCount`, `getProcessedCount`, `hasCurrentPackage`) and a `Model(Random)` constructor so tests and the controller can check state. Two package-private helpers (`enqueueUnprocessed`, `enqueueProcessed`) exist only so tests can load known packages.
-- `removeFromShelf` used to fail whenever the processed queue was empty, even if the slot held a package. It now fails only for a bad position or an empty slot, as the spec says.
+- In the spec, `startDay()` initialized `unprocessedPackages` with random packages and cleared `processedPackages` and `shelves`. Currently, `startDay()` calls `checkQueue()` and clears `currentPackage` without wiping existing queues or shelves. 
+- In the spec, `viewShelf(int, int)` returned a package's contents, size, weight, and destination; our implementation calls `viewStamps()` to display the stamps applied to the shelved package.
+- `removeFromShelf` fails only for a bad position or an empty slot, as the spec says. 
 
 **Controller.**
-- The spec said `readInt()` returns -1 on bad input, but the Validation section said it keeps asking until the input is valid. We followed the Validation section: `readIntOption(min, max)` re-prompts until it gets a number in range.
-- `readMenuOption(numOptions)` takes the number of valid letters. It originally accepted one letter too many.
-- The game now runs in `run()` instead of inside the constructor, so tests can create a controller without starting the game.
+- The spec listed `private Controller()` and only a `scanner` field. We made `Controller()` `public` so `main` and tests can instantiate it, stored `view` and `model` as fields, and moved the game loop into `private void run()`. 
+- The spec had `readMenuOption()` with no parameters; we changed it to `readMenuOption(int numOptions)` so each menu validates against its own number of valid letters. 
+- The spec said `readInt()` returns `-1` on bad input, while the Validation section said it keeps asking until the input is valid. We implemented `public int readIntOption(int min, int max)` to validate range on a single input and return `-1` on invalid input, while the loops in `run()` handle re-prompting until a valid integer is entered. 
 - We added a "Go Back" choice (`T`) to the stamp menu so a mistaken click does not force a stamp onto the package.
 
-**View.** We added the typed print methods (`printWeight`, `printVolume`, `printDestination`, `printContents`, `printStampAdded`, `printScore`, `printFinalScore`, `printMessage`) so the controller does not build output text itself. They replace the generic `printMisc`.
+**View.** The spec's system diagram showed `View<T>`, which we implemented as a non-generic `View` class. Beyond the 6 print methods in the spec, we added prompt and feedback helpers (`printIntError`, `printLeaveGame`, `printReadShelfNumber`, `printReadShelveNumber`, `printShelves`, `printPackage`, `printMessage`) as well as typed print methods (`printWeight`, `printVolume`, `printDestination`, `printContents`, `printStampAdded`, `printScore`, `printFinalScore`). `Controller` calls `printFinalScore` on exit and routes package details and daily scores through `printPackage` and `printMessage`. 
 
-**Where validation lives.** It is where the spec put it: menu letters and numbers are checked in the Controller, and shelf, stamp-capacity and empty-queue checks are in the Model and Package. The one addition is that `Package.addStamp` also rejects null and empty names.
+**Where validation lives.** It is where the spec put it: menu letters and numbers are checked in the Controller, and shelf, stamp-capacity and empty-queue checks are in the Model and Package. The one addition is that `Package.addStamp` also rejects null and blank names.
 
-**Tests.** The spec's test plan listed an `OutOfMemoryError` case for the Model constructor and a "package generation fails" case. We cannot force either, so they are not tested directly (the second is handled by a try/catch in `addToQueue`). The "shelves are null" cases are tested by setting the field to null with reflection. We added tests for every class, including `PackageTest` and `ModelTest`, and replaced the old `student.TestCase`-based `QueueTest` with JUnit 5 like the other tests.
+**Tests.** The spec's test plan listed an `OutOfMemoryError` case for the Model constructor and a "package generation fails" case in `addToQueue()`. We cannot force either, so they are not tested directly. The "shelves are null" cases are tested by setting the field to null with reflection. All test classes (`QueueTest`, `PackageTest`, `ModelTest`, `ViewTest`, and `ControllerTest`) extend `student.TestCase`. 
 
 The spec's bad input "trying to run commands after the time system has run out" assumed a timer. There is no timer yet, so we apply it to commands after the day has ended: the day menu only offers Start and Leave, so day commands cannot be entered once the day is over.
 
@@ -78,7 +78,7 @@ We listed two unknowns: how to build a real-time clock for the player, and how t
 ### What doesn't work yet?
 
 - No timer or timed day (stretch goal).
-- Packages left unprocessed or unscored at the end of a day are not carried to the next day. `startDay` clears them, although the MVP says leftovers should be stored for tomorrow.
+- `Model.startDay()` only calls `checkQueue()` once (adding 1 package if fewer than 3 are queued) rather than refilling the queue to 3 packages at the start of a new day, and `Model` does not yet manage how leftover processed or shelved packages carry over between days.
 - Only the first 30 processed packages are scored, but there is no visible "vehicle full" step.
 - Denying a package is free. Denying a safe package costs nothing and denying an unsafe package earns nothing, so denying everything scores 0.
 - The MVP says stamping happens before the user continues, but "finish" is allowed with zero stamps.
@@ -88,9 +88,9 @@ We listed two unknowns: how to build a real-time clock for the player, and how t
 
 ### What is left to finish the MVP, in order
 
-1. Carry unprocessed and unscored packages over to the next day, so leftovers are kept instead of cleared (`Model.startDay`, `Model.calculateScore`).
+1. Update `Model.startDay()` so a new day ensures `unprocessedPackages` is filled up to 3 packages while cleanly carrying over leftover packages from the previous day (`Model.startDay`, `Model.calculateScore`).
 2. Add a score effect for denying packages: a penalty for denying a safe package and a small reward for correctly denying an unsafe one (`Model.denyPackage`, `Package.isSafe`). This closes the "deny everything" loophole.
-3. Show a clear end-of-day summary: how many packages were scored and how many are left over (`View`, `Controller.playDay`).
+3. Show a clear end-of-day summary: how many packages were scored and how many are left over (`View`, `Controller.run`).
 4. Decide whether finishing with no stamps should be blocked, and update tests to match.
 5. Run all tests in Eclipse and fix style warnings.
 
@@ -101,15 +101,15 @@ A customer drops off a priority package in person and asks for it to be processe
 **Predicted to change:**
 - `Queue`: new `enqueueFront(T)` method (and `QueueTest`). `dequeue`, `peek`, `size` and `isEmpty` should not need to change.
 - `Model`: new `addPriorityPackage()`, which makes a package and calls `enqueueFront`. `startProcessing()` should not change, because it already takes the front package.
-- `Controller`: `playDay()` gets a new menu branch, and `GAME_OPTIONS` goes from 6 to 7.
+- `Controller`: `run()` gets a new menu branch, and the option count passed to `readMenuOption` for the game menu goes from 6 to 7.
 - `View`: `printGameMenu()` gets a new option, and a new `printPriorityArrival()` method announces the arrival.
 
 **Predicted not to change:** `Package` (a priority package is an ordinary package), `Queue.Node`, `Model.calculateScore`, `Package.gradeStamps`, the shelf methods, and the Model/View separation (the model still never calls the view).
 
 ### Stretch goals
 
-- **Committing to:** priority processing (our change feature).
-- **Dropping:** the timing challenge, priority shipping, in-person package pickup, shipments per location, and sorting shelves by rule. The first three need either the clock (still an open unknown) or more shelf logic than we have time for.
+- **Committing to:** priority processing, priority shipping, shipments per location, timing challenge
+- **Dropping:** sorting shelves by rule
 
 ### New tests needed
 
@@ -132,21 +132,22 @@ A customer drops off a priority package in person and asks for it to be processe
 
 | File | Who | How |
 | --- | --- | --- |
-| `Queue.java` (includes nested `Node`) | Nikita | Wrote and revised. GenAI-assisted. |
-| `QueueTest.java` | Sarah | Wrote and revised. GenAI-assisted. |
-| `Package.java` | Sarah | Wrote and revised. GenAI-assisted. |
-| `PackageTest.java` | Nikita|
-| `Model.java` | Sarah | Wrote and revised. GenAI-assisted. |
-| `ModelTest.java` | Sarah. |
-| `View.java` | Max | Wrote and revised. GenAI-assisted. |
+| `Queue.java` (includes nested `Node`) | Nikita | Wrote and revised. |
+| `QueueTest.java` | Sarah | Wrote and revised. |
+| `Package.java` | Sarah | Wrote and revised. |
+| `PackageTest.java` | Nikita | Wrote and revised. |
+| `Model.java` | Sarah | Wrote and revised.|
+| `ModelTest.java` | Sarah | Wrote and revised.|
+| `View.java` | Max | Wrote and revised. |
 | `ViewTest.java` | Max | Wrote and revised. GenAI-assisted. |
-| `Controller.java` | Max | Wrote and revised. GenAI-assisted. |
+| `Controller.java` | Max | Wrote and revised. |
 | `ControllerTest.java` | Max | Wrote and revised. GenAI-assisted. |
 
 ### GenAI note
 
-We used GenAI in 3 ways:
+We used GenAI in 4 ways:
 
 1. **Project name.** We prompted it for game title suggestions and kept "Precision Post".
 2. **Spec review.** We had it review our spec for logic errors and missing MVP functionality.
-3. **Early code help.** It helped with the class implementation and with writing some tests.
+3. **View and Controller Tests.** It helped with writing tests for the view and controller which needed to read and write to the console.
+4. **Logic Errors.** We prompted it to find logic errors and updated our code accordingly.

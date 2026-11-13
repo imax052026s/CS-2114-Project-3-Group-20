@@ -38,7 +38,7 @@ public class Controller
      * Displays the game instructions and runs the main game loop until the
      * player chooses to leave.
      */
-    public void run()
+    private void run()
     {
         view.printInstructions();
         boolean playing = true;
@@ -393,6 +393,7 @@ public class Controller
             }
             else if (choice == 'B')
             {
+                view.printFinalScore(model.viewScores());
                 view.printLeaveGame();
                 playing = false;
             }
@@ -468,7 +469,7 @@ public class Controller
      * @return the valid integer entered, or -1 if the input was not a valid
      *             number or was out of range
      */
-    int readIntOption(int min, int max)
+    public int readIntOption(int min, int max)
     {
         String input = scanner.nextLine().trim();
         if (input.equals(""))
