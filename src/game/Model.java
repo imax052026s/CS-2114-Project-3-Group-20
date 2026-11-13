@@ -1,7 +1,6 @@
 package game;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 // -------------------------------------------------------------------------
 /**
@@ -14,111 +13,62 @@ import java.util.Random;
 public class Model
 {
     // ~ Fields ................................................................
-
-    /** Number of shelves (rows). */
-    public static final int SHELF_ROWS = 5;
-
-    /** Number of slots on each shelf (columns). */
-    public static final int SHELF_SLOTS = 5;
-
-    /** Number of processed packages that fit on the vehicle (and are scored). */
-    public static final int VEHICLE_CAPACITY = 30;
-
-    /** Number of packages waiting when a day starts. */
-    public static final int STARTING_PACKAGES = 10;
-
-    /** The queue is topped up whenever it holds fewer packages than this. */
-    public static final int MIN_QUEUE_SIZE = 3;
-
-    private static final String NO_SHELVES = "No shelves initialized";
-    private static final String NO_PACKAGE = "No package currently being "
-        + "processed";
-
     private Queue<Package> unprocessedPackages;
     private Queue<Package> processedPackages;
     private Package[][] shelves;
     private ArrayList<Integer> scores;
     private Package currentPackage;
-    private Random random;
 
     // ~ Constructors ..........................................................
 
     // ----------------------------------------------------------
     /**
-     * Creates a model with no packages and empty shelves.
+     * Creates a model with empty package queues, an empty 5x5 grid of shelves,
+     * no recorded scores, and no package currently being processed.
      */
     public Model()
     {
-        this(new Random());
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Creates a model that makes its packages with the given random number
-     * generator. A seeded generator makes the game repeatable.
-     *
-     * @param random
-     *            the source of randomness
-     */
-    public Model(Random random)
-    {
-        this.random = random;
         unprocessedPackages = new Queue<Package>();
         processedPackages = new Queue<Package>();
-        shelves = new Package[SHELF_ROWS][SHELF_SLOTS];
+        shelves = new Package[5][5];
         scores = new ArrayList<Integer>();
         currentPackage = null;
     }
 
-
     // ~ Public Methods ........................................................
+
 
     // ----------------------------------------------------------
     /**
-     * Starts a new day. Fills the unprocessed queue with random packages and
-     * clears the processed queue, the shelves and the current package. If a
-     * day was already in progress it is reset.
+     * Starts a new day by ensuring the unprocessed queue has been checked for
+     * new packages and clearing any package currently being processed.
      */
     public void startDay()
     {
-        unprocessedPackages.clear();
-        processedPackages.clear();
-        shelves = new Package[SHELF_ROWS][SHELF_SLOTS];
+        checkQueue();
         currentPackage = null;
-        for (int i = 0; i < STARTING_PACKAGES; i++)
-        {
-            addToQueue();
-        }
     }
 
 
     // ----------------------------------------------------------
     /**
-     * Adds a new random package to the back of the unprocessed queue. If the
-     * package cannot be made, the queue is left unchanged.
+     * Creates a new random package and adds it to the back of the unprocessed
+     * queue.
      */
     public void addToQueue()
     {
-        try
-        {
-            unprocessedPackages.enqueue(new Package(random));
-        }
-        catch (RuntimeException e)
-        {
-            // Package generation failed; leave the queue unchanged.
-        }
+        unprocessedPackages.enqueue(new Package());
     }
 
 
     // ----------------------------------------------------------
     /**
-     * Adds a new package to the queue if it holds fewer than
-     * {@link #MIN_QUEUE_SIZE} packages.
+     * Adds one new random package to the unprocessed queue if it currently
+     * holds fewer than 3 packages.
      */
     public void checkQueue()
     {
-        if (unprocessedPackages.size() < MIN_QUEUE_SIZE)
+        if (unprocessedPackages.size() < 3)
         {
             addToQueue();
         }
@@ -127,66 +77,60 @@ public class Model
 
     // ----------------------------------------------------------
     /**
-     * Returns a picture of the shelves, with an x in each slot that holds a
-     * package.
+     * Returns an ASCII diagram of the shelves, with an x in each slot that
+     * holds a package.
      *
-     * @return the picture, or "No shelves initialized" if there are no shelves
+     * @return the diagram of the shelves, or an error message if shelves are
+     *             not initialized
      */
     public String viewShelves()
     {
         if (shelves == null)
         {
-            return NO_SHELVES;
+            return "No shelves initalized";
         }
-        StringBuilder str = new StringBuilder();
-        str.append("    ");
-        for (int j = 0; j < shelves[0].length; j++)
-        {
-            str.append("   ").append(j + 1).append("    ");
-        }
-        str.append("\n");
+        String str = "";
         for (int i = 0; i < shelves.length; i++)
         {
-            str.append(border(shelves[i].length)).append("\n");
-            str.append(" ").append(i + 1).append("  ");
+            str += " -----   -----   -----   -----   ----- \n";
             for (int j = 0; j < shelves[i].length; j++)
             {
                 if (shelves[i][j] != null)
                 {
-                    str.append("|  x  | ");
+                    str += "|  x  | ";
                 }
                 else
                 {
-                    str.append("|     | ");
+                    str += "|     | ";
                 }
             }
-            str.append("\n");
+            str += "\n";
         }
-        str.append(border(shelves[0].length));
-        return str.toString();
+        str += " -----   -----   -----   -----   ----- \n";
+        return str;
     }
 
 
     // ----------------------------------------------------------
     /**
-     * Describes the package in one slot of the shelves.
+     * Returns the stamps applied to the package in one slot of the shelves.
      *
      * @param shelfNumber
      *            the shelf (row), starting at 0
      * @param shelveNumber
      *            the slot on that shelf (column), starting at 0
-     * @return the contents, size, weight, destination and stamps of the
-     *         package; "No package exists here" if the slot is empty;
-     *         "Invalid shelf position" if the slot does not exist; or
-     *         "No shelves initialized" if there are no shelves
+     * @return the applied stamps of the package (or "No stamps"); "No package
+     *             exists here" if the slot is empty; "Invalid shelf position"
+     *             if the indices exceed the shelf bounds; or an error message
+     *             if shelves are not initialized
      */
     public String viewShelf(int shelfNumber, int shelveNumber)
     {
         if (shelves == null)
         {
-            return NO_SHELVES;
+            return "No shelves initalized";
         }
-        if (!isValidPosition(shelfNumber, shelveNumber))
+        if (shelfNumber >= shelves.length || shelveNumber >= shelves[0].length)
         {
             return "Invalid shelf position";
         }
@@ -195,9 +139,7 @@ public class Model
         {
             return "No package exists here";
         }
-        return "Contents: " + p.viewContents() + "\nSize: " + p.measure()
-            + " in^3\nWeight: " + p.weigh() + " lbs\nDestination: "
-            + p.readDestination() + "\nStamps: " + p.viewStamps();
+        return p.viewStamps();
     }
 
 
@@ -209,18 +151,19 @@ public class Model
      *            the shelf (row), starting at 0
      * @param shelveNumber
      *            the slot on that shelf (column), starting at 0
-     * @return true if the package was placed; false if there are no shelves,
-     *         the position does not exist, the slot already holds a package,
-     *         or there is no processed package to place
+     * @return true if the package was placed; false if shelves are not
+     *             initialized, the indices exceed the shelf bounds, the slot
+     *             already holds a package, or there is no processed package to
+     *             place
      */
     public boolean addToShelf(int shelfNumber, int shelveNumber)
     {
-        if (shelves == null || !isValidPosition(shelfNumber, shelveNumber))
+        if (shelves == null || shelfNumber >= shelves.length
+            || shelveNumber >= shelves[0].length || processedPackages.isEmpty())
         {
             return false;
         }
-        if (shelves[shelfNumber][shelveNumber] != null
-            || processedPackages.isEmpty())
+        if (shelves[shelfNumber][shelveNumber] != null)
         {
             return false;
         }
@@ -237,12 +180,14 @@ public class Model
      *            the shelf (row), starting at 0
      * @param shelveNumber
      *            the slot on that shelf (column), starting at 0
-     * @return true if a package was moved; false if there are no shelves, the
-     *         position does not exist, or the slot is empty
+     * @return true if a package was moved; false if shelves are not
+     *             initialized, the indices exceed the shelf bounds, or the slot
+     *             is empty
      */
     public boolean removeFromShelf(int shelfNumber, int shelveNumber)
     {
-        if (shelves == null || !isValidPosition(shelfNumber, shelveNumber))
+        if (shelves == null || shelfNumber >= shelves.length
+            || shelveNumber >= shelves[0].length)
         {
             return false;
         }
@@ -258,16 +203,15 @@ public class Model
 
     // ----------------------------------------------------------
     /**
-     * Scores the first {@link #VEHICLE_CAPACITY} packages in the processed
-     * queue, removes them from the queue, and records the total.
+     * Scores up to the first 30 packages in the processed queue, removes them
+     * from the queue, and records the total score for the day.
      *
      * @return the total score, or 0 if there are no processed packages
      */
     public int calculateScore()
     {
         int totalScore = 0;
-        for (int i = 0; i < VEHICLE_CAPACITY && !processedPackages.isEmpty();
-            i++)
+        for (int i = 0; i < 30 && !processedPackages.isEmpty(); i++)
         {
             totalScore += processedPackages.dequeue().gradeStamps();
         }
@@ -280,26 +224,21 @@ public class Model
     /**
      * Returns the score recorded for each day played.
      *
-     * @return one line per day, or "No scores recorded" if no day has been
-     *         scored
+     * @return one line per day, or "No scores recorded\n" if no day has been
+     *             scored
      */
     public String viewScores()
     {
         if (scores == null || scores.isEmpty())
         {
-            return "No scores recorded";
+            return "No scores recorded\n";
         }
-        StringBuilder str = new StringBuilder();
+        String str = "";
         for (int i = 0; i < scores.size(); i++)
         {
-            if (i > 0)
-            {
-                str.append("\n");
-            }
-            str.append("Day ").append(i + 1).append(": ")
-                .append(scores.get(i));
+            str += "Day " + (i + 1) + ": " + scores.get(i) + "\n";
         }
-        return str.toString();
+        return str;
     }
 
 
@@ -308,8 +247,8 @@ public class Model
      * Takes the package at the front of the unprocessed queue to work on.
      * Callers should finish or deny the previous package first.
      *
-     * @return true if a package is now being processed, false if there were
-     *         no packages waiting
+     * @return true if a package is now being processed, false if there were no
+     *             packages waiting
      */
     public boolean startProcessing()
     {
@@ -360,7 +299,7 @@ public class Model
     {
         if (currentPackage == null)
         {
-            return NO_PACKAGE;
+            return "No package currently being processed";
         }
         return currentPackage.readDestination();
     }
@@ -376,7 +315,7 @@ public class Model
     {
         if (currentPackage == null)
         {
-            return NO_PACKAGE;
+            return "No package currently being processed";
         }
         return currentPackage.viewContents();
     }
@@ -389,7 +328,7 @@ public class Model
      * @param stamp
      *            the name of the stamp
      * @return true if the stamp was added; false if no package is being
-     *         processed or the package has no room for another stamp
+     *             processed or the package has no room for another stamp
      */
     public boolean addStampToPackage(String stamp)
     {
@@ -423,88 +362,5 @@ public class Model
             processedPackages.enqueue(currentPackage);
             currentPackage = null;
         }
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Returns how many packages are waiting to be processed.
-     *
-     * @return the number of unprocessed packages
-     */
-    public int getUnprocessedCount()
-    {
-        return unprocessedPackages.size();
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Returns how many processed packages are waiting to be shelved or
-     * scored.
-     *
-     * @return the number of processed packages
-     */
-    public int getProcessedCount()
-    {
-        return processedPackages.size();
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Returns whether a package is currently being processed.
-     *
-     * @return true if there is a current package
-     */
-    public boolean hasCurrentPackage()
-    {
-        return currentPackage != null;
-    }
-
-
-    // ~ Package-private and private methods ...................................
-
-    // ----------------------------------------------------------
-    /**
-     * Adds a specific package to the unprocessed queue (used for testing).
-     *
-     * @param p
-     *            the package to add
-     */
-    void enqueueUnprocessed(Package p)
-    {
-        unprocessedPackages.enqueue(p);
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Adds a specific package to the processed queue (used for testing).
-     *
-     * @param p
-     *            the package to add
-     */
-    void enqueueProcessed(Package p)
-    {
-        processedPackages.enqueue(p);
-    }
-
-
-    private boolean isValidPosition(int shelf, int slot)
-    {
-        return shelf >= 0 && shelf < shelves.length && slot >= 0
-            && slot < shelves[shelf].length;
-    }
-
-
-    private String border(int slots)
-    {
-        StringBuilder str = new StringBuilder("    ");
-        for (int j = 0; j < slots; j++)
-        {
-            str.append("------- ");
-        }
-        return str.toString();
     }
 }

@@ -1,13 +1,5 @@
 package game;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 // -------------------------------------------------------------------------
 /**
  * Tests the Queue class.
@@ -15,7 +7,8 @@ import org.junit.jupiter.api.Test;
  * @author Group 20
  * @version 2026.11.12
  */
-class QueueTest
+public class QueueTest
+    extends student.TestCase
 {
     private Queue<String> queue;
 
@@ -23,7 +16,6 @@ class QueueTest
     /**
      * Creates an empty queue before each test.
      */
-    @BeforeEach
     public void setUp()
     {
         queue = new Queue<String>();
@@ -34,7 +26,6 @@ class QueueTest
     /**
      * A new queue is empty.
      */
-    @Test
     public void testConstructor()
     {
         assertEquals(0, queue.size());
@@ -47,7 +38,6 @@ class QueueTest
     /**
      * Enqueue adds to the back and counts entries.
      */
-    @Test
     public void testEnqueue()
     {
         assertTrue(queue.enqueue("a"));
@@ -62,7 +52,6 @@ class QueueTest
     /**
      * Enqueueing null returns false and changes nothing.
      */
-    @Test
     public void testEnqueueNull()
     {
         assertFalse(queue.enqueue(null));
@@ -78,7 +67,6 @@ class QueueTest
     /**
      * Dequeue removes entries first in, first out.
      */
-    @Test
     public void testDequeue()
     {
         queue.enqueue("a");
@@ -97,7 +85,6 @@ class QueueTest
     /**
      * Dequeueing an empty queue returns null.
      */
-    @Test
     public void testDequeueEmpty()
     {
         assertNull(queue.dequeue());
@@ -113,7 +100,6 @@ class QueueTest
     /**
      * The queue still works after being emptied by dequeue.
      */
-    @Test
     public void testReuseAfterEmptying()
     {
         queue.enqueue("a");
@@ -129,7 +115,6 @@ class QueueTest
     /**
      * Peek returns the front entry without removing it.
      */
-    @Test
     public void testPeek()
     {
         assertNull(queue.peek());
@@ -145,7 +130,6 @@ class QueueTest
     /**
      * isEmpty tracks whether entries exist.
      */
-    @Test
     public void testIsEmpty()
     {
         assertTrue(queue.isEmpty());
@@ -160,7 +144,6 @@ class QueueTest
     /**
      * Clear removes everything and the queue can be used again.
      */
-    @Test
     public void testClear()
     {
         queue.enqueue("a");
@@ -179,7 +162,6 @@ class QueueTest
     /**
      * Many entries stay in order.
      */
-    @Test
     public void testManyEntries()
     {
         for (int i = 0; i < 1000; i++)

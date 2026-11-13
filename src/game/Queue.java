@@ -2,8 +2,8 @@ package game;
 
 // -------------------------------------------------------------------------
 /**
- * A generic first-in, first-out queue implemented as a singly linked chain.
- * New entries are added to the back and removed from the front.
+ * A generic first-in, first-out queue implemented as a singly linked chain. New
+ * entries are added to the back and removed from the front.
  *
  * @param <T>
  *            the type of entries stored in the queue
@@ -31,8 +31,8 @@ public class Queue<T>
         numberOfEntries = 0;
     }
 
-
     // ~ Public Methods ........................................................
+
 
     // ----------------------------------------------------------
     /**

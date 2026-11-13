@@ -13,83 +13,386 @@ import java.util.Scanner;
 public class Controller
 {
     // ~ Fields ................................................................
-
-    /** The stamps, in the same order as the letters in the stamp menu. */
-    static final String[] STAMPS = { "Light Load", "Medium Load", "Heavy Load",
-        "Small", "Medium", "Large", "Fragile", "Flammable", "Keep Dry",
-        "Virginia Beach", "Chesapeake", "Arlington", "Richmond", "Norfolk",
-        "Newport News", "Alexandria", "Hampton", "Suffolk", "Roanoke" };
-
-    private static final int DAY_OPTIONS = 2;
-    private static final int GAME_OPTIONS = 6;
-    private static final int PACKAGE_OPTIONS = 7;
-    private static final int STAMP_OPTIONS = STAMPS.length + 1;
-    private static final char NO_CHOICE = '0';
-
     private Scanner scanner;
     private View view;
     private Model model;
-    private boolean inputClosed;
 
     // ~ Constructors ..........................................................
 
     // ----------------------------------------------------------
     /**
-     * Creates a controller that reads from System.in.
+     * Creates a controller that reads from System.in and starts the game loop.
      */
     public Controller()
     {
-        this(new Model());
+        setUp();
+
+        run();
     }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Creates a controller that reads from System.in and uses the given model.
-     *
-     * @param model
-     *            the model to update
-     */
-    Controller(Model model)
-    {
-        setUp(model);
-    }
-
 
     // ~ Public Methods ........................................................
 
-    // ----------------------------------------------------------
-    /**
-     * Starts the program.
-     *
-     * @param args
-     *            not used
-     */
-    public static void main(String[] args)
-    {
-        new Controller().run();
-    }
-
 
     // ----------------------------------------------------------
     /**
-     * Plays the game until the player leaves or the input runs out.
+     * Displays the game instructions and runs the main game loop until the
+     * player chooses to leave.
      */
     public void run()
     {
         view.printInstructions();
         boolean playing = true;
-        while (playing && !inputClosed)
+        while (playing)
         {
+            view.printMessage("\n" + model.viewScores());
             view.printDayMenu();
-            char choice = readMenuOption(DAY_OPTIONS);
+            char choice = readMenuOption(2);
             if (choice == 'A')
             {
-                playDay();
+                model.startDay();
+                boolean day = true;
+                while (day)
+                {
+                    model.checkQueue();
+                    view.printGameMenu();
+                    choice = readMenuOption(6);
+                    if (choice == 'A')
+                    {
+                        model.startProcessing();
+                        boolean processing = true;
+                        while (processing)
+                        {
+                            view.printPackageProcessMenu();
+                            choice = readMenuOption(7);
+                            if (choice == 'A')
+                            {
+                                view.printPackage(
+                                    "\nWeight in lbs: " + model.weighPackage());
+                            }
+                            else if (choice == 'B')
+                            {
+                                view.printPackage(
+                                    "\nVolume in in^3: "
+                                        + model.measurePackage());
+                            }
+                            else if (choice == 'C')
+                            {
+                                view.printPackage(
+                                    "\nContents: "
+                                        + model.viewContentsOfPackage());
+                            }
+                            else if (choice == 'D')
+                            {
+                                view.printPackage(
+                                    "\nDestination: "
+                                        + model.readDestinationOfPackage());
+                            }
+                            else if (choice == 'E')
+                            {
+                                boolean stampAdded = false;
+                                while (!stampAdded)
+                                {
+                                    view.printStampMenu();
+                                    choice = readMenuOption(20);
+                                    if (choice == 'A')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Light Load"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'B')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Medium Load"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'C')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Heavy Load"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'D')
+                                    {
+                                        if (!model.addStampToPackage("Small"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'E')
+                                    {
+                                        if (!model.addStampToPackage("Medium"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'F')
+                                    {
+                                        if (!model.addStampToPackage("Large"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'G')
+                                    {
+                                        if (!model.addStampToPackage("Fragile"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'H')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Flammable"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'I')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Keep Dry"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'J')
+                                    {
+                                        if (!model.addStampToPackage(
+                                            "Virginia Beach"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'K')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Chesapeake"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'L')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Arlington"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'M')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Richmond"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'N')
+                                    {
+                                        if (!model.addStampToPackage("Norfolk"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'O')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Newport News"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'P')
+                                    {
+                                        if (!model
+                                            .addStampToPackage("Alexandria"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'Q')
+                                    {
+                                        if (!model.addStampToPackage("Hampton"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'R')
+                                    {
+                                        if (!model.addStampToPackage("Suffolk"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'S')
+                                    {
+                                        if (!model.addStampToPackage("Roanoke"))
+                                        {
+                                            view.printMessage(
+                                                "There is no room for any more stamps.");
+                                        }
+                                        stampAdded = true;
+                                    }
+                                    else if (choice == 'T')
+                                    {
+                                        stampAdded = true;
+                                    }
+                                }
+                            }
+                            else if (choice == 'F')
+                            {
+                                model.denyPackage();
+                                processing = false;
+                            }
+                            else if (choice == 'G')
+                            {
+                                model.finishProcessing();
+                                processing = false;
+                            }
+                        }
+                    }
+                    else if (choice == 'B')
+                    {
+                        view.printShelves(model.viewShelves());
+                    }
+                    else if (choice == 'C')
+                    {
+                        boolean shelfSelected = false;
+                        int shelf = 0;
+                        while (!shelfSelected)
+                        {
+                            view.printReadShelfNumber();
+                            shelf = readIntOption(1, 5) - 1;
+                            if (shelf != -2)
+                            {
+                                shelfSelected = true;
+                            }
+                        }
+                        boolean shelveSelected = false;
+                        int shelve = 0;
+                        while (!shelveSelected)
+                        {
+                            view.printReadShelveNumber();
+                            shelve = readIntOption(1, 5) - 1;
+                            if (shelve != -2)
+                            {
+                                shelfSelected = true;
+                            }
+                        }
+                        view.printPackage(model.viewShelf(shelf, shelve));
+                    }
+                    else if (choice == 'D')
+                    {
+                        boolean shelfSelected = false;
+                        int shelf = 0;
+                        while (!shelfSelected)
+                        {
+                            view.printReadShelfNumber();
+                            shelf = readIntOption(1, 5) - 1;
+                            if (shelf != -2)
+                            {
+                                shelfSelected = true;
+                            }
+                        }
+                        boolean shelveSelected = false;
+                        int shelve = 0;
+                        while (!shelveSelected)
+                        {
+                            view.printReadShelveNumber();
+                            shelve = readIntOption(1, 5) - 1;
+                            if (shelve != -2)
+                            {
+                                shelfSelected = true;
+                            }
+                        }
+                        if (!model.addToShelf(shelf, shelve))
+                        {
+                            view.printMessage(
+                                "Either a package is already on that shelf or you have no processed packages to place.");
+                        }
+                    }
+                    else if (choice == 'E')
+                    {
+                        boolean shelfSelected = false;
+                        int shelf = 0;
+                        while (!shelfSelected)
+                        {
+                            view.printReadShelfNumber();
+                            shelf = readIntOption(1, 5) - 1;
+                            if (shelf != -2)
+                            {
+                                shelfSelected = true;
+                            }
+                        }
+                        boolean shelveSelected = false;
+                        int shelve = 0;
+                        while (!shelveSelected)
+                        {
+                            view.printReadShelveNumber();
+                            shelve = readIntOption(1, 5) - 1;
+                            if (shelve != -2)
+                            {
+                                shelfSelected = true;
+                            }
+                        }
+                        if (!model.removeFromShelf(shelf, shelve))
+                        {
+                            view.printMessage(
+                                "A package is not on that shelf.");
+                        }
+                    }
+                    else if (choice == 'F')
+                    {
+                        view.printMessage("Score: " + model.calculateScore());
+                        day = false;
+                    }
+                }
             }
             else if (choice == 'B')
             {
-                view.printFinalScore(model.viewScores());
                 view.printLeaveGame();
                 playing = false;
             }
@@ -97,274 +400,113 @@ public class Controller
     }
 
 
-    // ~ Package-private and private methods ...................................
-
-    private void setUp(Model theModel)
+    // ----------------------------------------------------------
+    /**
+     * Initializes the input scanner, view, and model.
+     */
+    private void setUp()
     {
         scanner = new Scanner(System.in);
         view = new View();
-        model = theModel;
-        inputClosed = false;
+        model = new Model();
     }
 
 
-    private void playDay()
-    {
-        model.startDay();
-        boolean day = true;
-        while (day && !inputClosed)
-        {
-            model.checkQueue();
-            view.printGameMenu();
-            char choice = readMenuOption(GAME_OPTIONS);
-            if (choice == 'A')
-            {
-                processPackage();
-            }
-            else if (choice == 'B')
-            {
-                view.printShelves(model.viewShelves());
-            }
-            else if (choice == 'C')
-            {
-                viewShelf();
-            }
-            else if (choice == 'D')
-            {
-                placeOnShelf();
-            }
-            else if (choice == 'E')
-            {
-                removeFromShelf();
-            }
-            else if (choice == 'F')
-            {
-                view.printScore(model.calculateScore());
-                day = false;
-            }
-        }
-    }
-
-
-    private void processPackage()
-    {
-        if (!model.startProcessing())
-        {
-            view.printMessage("There are no packages to process right now.");
-            return;
-        }
-        boolean processing = true;
-        while (processing && !inputClosed)
-        {
-            view.printPackageProcessMenu();
-            char choice = readMenuOption(PACKAGE_OPTIONS);
-            if (choice == 'A')
-            {
-                view.printWeight(model.weighPackage());
-            }
-            else if (choice == 'B')
-            {
-                view.printVolume(model.measurePackage());
-            }
-            else if (choice == 'C')
-            {
-                view.printContents(model.viewContentsOfPackage());
-            }
-            else if (choice == 'D')
-            {
-                view.printDestination(model.readDestinationOfPackage());
-            }
-            else if (choice == 'E')
-            {
-                addStamp();
-            }
-            else if (choice == 'F')
-            {
-                model.denyPackage();
-                view.printMessage("Package denied.");
-                processing = false;
-            }
-            else if (choice == 'G')
-            {
-                model.finishProcessing();
-                view.printMessage("Package processed.");
-                processing = false;
-            }
-        }
-    }
-
-
-    private void addStamp()
-    {
-        char choice = NO_CHOICE;
-        while (choice == NO_CHOICE && !inputClosed)
-        {
-            view.printStampMenu();
-            choice = readMenuOption(STAMP_OPTIONS);
-        }
-        int index = choice - 'A';
-        if (choice == NO_CHOICE || index >= STAMPS.length)
-        {
-            return;
-        }
-        if (model.addStampToPackage(STAMPS[index]))
-        {
-            view.printStampAdded(STAMPS[index]);
-        }
-        else
-        {
-            view.printMessage("There is no room for any more stamps.");
-        }
-    }
-
-
-    private void viewShelf()
-    {
-        int[] position = readShelfPosition();
-        if (position != null)
-        {
-            view.printPackage(model.viewShelf(position[0], position[1]));
-        }
-    }
-
-
-    private void placeOnShelf()
-    {
-        int[] position = readShelfPosition();
-        if (position == null)
-        {
-            return;
-        }
-        if (model.addToShelf(position[0], position[1]))
-        {
-            view.printMessage("Package placed on the shelf.");
-        }
-        else if (model.getProcessedCount() == 0)
-        {
-            view.printMessage("You have no processed packages to place.");
-        }
-        else
-        {
-            view.printMessage("A package is already on that shelf slot.");
-        }
-    }
-
-
-    private void removeFromShelf()
-    {
-        int[] position = readShelfPosition();
-        if (position == null)
-        {
-            return;
-        }
-        if (model.removeFromShelf(position[0], position[1]))
-        {
-            view.printMessage("Package removed from the shelf.");
-        }
-        else
-        {
-            view.printMessage("There is no package on that shelf slot.");
-        }
-    }
-
-
+    // ----------------------------------------------------------
     /**
-     * Asks for a shelf and a slot.
-     *
-     * @return the zero-based shelf and slot, or null if the input ran out
-     */
-    private int[] readShelfPosition()
-    {
-        view.printReadShelfNumber();
-        int shelf = readIntOption(1, Model.SHELF_ROWS);
-        if (shelf < 0)
-        {
-            return null;
-        }
-        view.printReadShelveNumber();
-        int slot = readIntOption(1, Model.SHELF_SLOTS);
-        if (slot < 0)
-        {
-            return null;
-        }
-        return new int[] { shelf - 1, slot - 1 };
-    }
-
-
-    private String readLine()
-    {
-        if (!scanner.hasNextLine())
-        {
-            inputClosed = true;
-            return null;
-        }
-        return scanner.nextLine();
-    }
-
-
-    /**
-     * Reads one menu choice.
+     * Reads one menu choice from standard input and validates that it is a
+     * single letter within the allowed option range.
      *
      * @param numOptions
      *            how many letters (starting at A) are valid
      * @return the chosen letter in upper case, or '0' if the input was not a
-     *         valid choice (an error is shown) or the input ran out
+     *             valid choice (an error message is displayed)
      */
-    char readMenuOption(int numOptions)
+    private char readMenuOption(int numOptions)
     {
-        String input = readLine();
-        if (input == null)
-        {
-            return NO_CHOICE;
-        }
-        input = input.trim();
-        if (input.length() != 1)
+        char selection = '0';
+        String input = scanner.nextLine();
+
+        if (input.trim().isEmpty())
         {
             view.printMenuError();
-            return NO_CHOICE;
         }
-        char choice = Character.toUpperCase(input.charAt(0));
-        int index = choice - 'A';
-        if (index < 0 || index >= numOptions)
+        else
         {
-            view.printMenuError();
-            return NO_CHOICE;
+            char[] inputArray = input.toCharArray();
+            if (inputArray.length > 1)
+            {
+                view.printMenuError();
+            }
+            else
+            {
+                char inputChar = Character.toUpperCase(inputArray[0]);
+                if ((int)inputChar - 65 < 0
+                    || (int)inputChar - 65 > numOptions - 1)
+                {
+                    view.printMenuError();
+                }
+                else
+                {
+                    selection = inputChar;
+                }
+            }
         }
-        return choice;
+        return selection;
     }
 
 
+    // ----------------------------------------------------------
     /**
-     * Reads a whole number, asking again until it is in range.
+     * Reads a single line of input and parses it as a whole number within the
+     * specified range, displaying an error message if the input is invalid.
      *
      * @param min
-     *            smallest valid number
+     *            smallest valid number (inclusive)
      * @param max
-     *            largest valid number
-     * @return the number, or -1 if the input ran out
+     *            largest valid number (inclusive)
+     * @return the valid integer entered, or -1 if the input was not a valid
+     *             number or was out of range
      */
     int readIntOption(int min, int max)
     {
-        while (true)
+        String input = scanner.nextLine().trim();
+        if (input.equals(""))
         {
-            String input = readLine();
-            if (input == null)
-            {
-                return -1;
-            }
+            view.printIntError();
+        }
+        else
+        {
             try
             {
-                int number = Integer.parseInt(input.trim());
-                if (number >= min && number <= max)
+                int number = Integer.parseInt(input);
+                if (number < min || number > max)
+                {
+                    view.printIntError();
+                }
+                else
                 {
                     return number;
                 }
             }
             catch (NumberFormatException e)
             {
-                // Not a number; fall through to the error message.
+                view.printIntError();
             }
-            view.printIntError();
         }
+        return -1;
+    }
+
+
+    // ----------------------------------------------------------
+    /**
+     * Starts the program by creating a new Controller.
+     *
+     * @param args
+     *            command-line arguments (not used)
+     */
+    public static void main(String[] args)
+    {
+        new Controller();
     }
 }

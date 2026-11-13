@@ -2,8 +2,8 @@ package game;
 
 // -------------------------------------------------------------------------
 /**
- * Displays menus, package information and scores to the player. The view
- * only prints what the controller gives it and never touches the model.
+ * Displays menus, package information and scores to the player. The view only
+ * prints what the controller gives it and never touches the model.
  *
  * @author Group 20
  * @version 2026.11.12
@@ -21,8 +21,8 @@ public class View
         // Nothing to set up.
     }
 
-
     // ~ Menus .................................................................
+
 
     // ----------------------------------------------------------
     /**
@@ -106,8 +106,8 @@ public class View
         System.out.print("Enter a choice from the menu: ");
     }
 
-
     // ~ Errors ................................................................
+
 
     // ----------------------------------------------------------
     /**
@@ -115,8 +115,9 @@ public class View
      */
     public void printMenuError()
     {
-        System.out.println("The entered value is not valid. "
-            + "Please enter a single letter option from the menu.");
+        System.out.println(
+            "The entered value is not valid. "
+                + "Please enter a single letter option from the menu.");
     }
 
 
@@ -126,12 +127,13 @@ public class View
      */
     public void printIntError()
     {
-        System.out.print("The entered value is not valid. "
-            + "Please enter a whole number in the range shown: ");
+        System.out.print(
+            "The entered value is not valid. "
+                + "Please enter a whole number in the range shown: ");
     }
 
-
     // ~ Information ...........................................................
+
 
     // ----------------------------------------------------------
     /**
@@ -140,37 +142,47 @@ public class View
     public void printInstructions()
     {
         System.out.println("\n===== HOW TO PLAY =====");
-        System.out.println("In this game, you will process packages and ship "
-            + "them out across Virginia.");
-        System.out.println("You will receive packages that need to be "
-            + "processed. View their properties to apply the appropriate "
-            + "stamps.");
-        System.out.println("One stamp should be for the weight, one should be "
-            + "for the size, and one should be for the destination.");
-        System.out.println("The weight stamp represents either a light, "
-            + "medium, or heavy load. A light load weighs under 10 lbs, a "
-            + "medium load weighs under 20 lbs, and any load heavier than "
-            + "that is a heavy load.");
-        System.out.println("The size stamp represents either a small, medium, "
-            + "or large package. A small package has a volume under 2000 "
-            + "in^3, a medium package has a volume under 5000 in^3, and any "
-            + "package larger than that is large.");
-        System.out.println("The destination stamp represents where the "
-            + "package must be shipped to. The name of the stamp is the same "
-            + "as the destination.");
-        System.out.println("Additionally, there are special stamps such as "
-            + "'Fragile', 'Flammable', and 'Keep Dry' which should be "
-            + "applied based on the contents of the package.");
-        System.out.println("Some packages will also be too unsafe to ship. Do "
-            + "not worry about stamping these packages, just deny them.");
-        System.out.println("Finally, you will be scored when you end the day "
-            + "based on the first 30 packages you have processed. You will "
-            + "receive a point for each correct stamp added to a package. "
-            + "You will lose a point for each incorrectly added stamp or "
-            + "stamp missed. If an unsafe package is processed, you will "
-            + "lose five points.");
-        System.out.println("If you are not yet ready to ship a processed "
-            + "package, you can place it on a shelf.");
+        System.out.println(
+            "In this game, you will process packages and ship "
+                + "them out across Virginia.");
+        System.out.println(
+            "You will receive packages that need to be "
+                + "processed. View their properties to apply the appropriate "
+                + "stamps.");
+        System.out.println(
+            "One stamp should be for the weight, one should be "
+                + "for the size, and one should be for the destination.");
+        System.out.println(
+            "The weight stamp represents either a light, "
+                + "medium, or heavy load. A light load weighs under 10 lbs, a "
+                + "medium load weighs under 20 lbs, and any load heavier than "
+                + "that is a heavy load.");
+        System.out.println(
+            "The size stamp represents either a small, medium, "
+                + "or large package. A small package has a volume under 2000 "
+                + "in^3, a medium package has a volume under 5000 in^3, and any "
+                + "package larger than that is large.");
+        System.out.println(
+            "The destination stamp represents where the "
+                + "package must be shipped to. The name of the stamp is the same "
+                + "as the destination.");
+        System.out.println(
+            "Additionally, there are special stamps such as "
+                + "'Fragile', 'Flammable', and 'Keep Dry' which should be "
+                + "applied based on the contents of the package.");
+        System.out.println(
+            "Some packages will also be too unsafe to ship. Do "
+                + "not worry about stamping these packages, just deny them.");
+        System.out.println(
+            "Finally, you will be scored when you end the day "
+                + "based on the first 30 packages you have processed. You will "
+                + "receive a point for each correct stamp added to a package. "
+                + "You will lose a point for each incorrectly added stamp or "
+                + "stamp missed. If an unsafe package is processed, you will "
+                + "lose five points.");
+        System.out.println(
+            "If you are not yet ready to ship a processed "
+                + "package, you can place it on a shelf.");
         System.out.println("Good luck!");
     }
 
@@ -220,10 +232,10 @@ public class View
 
     // ----------------------------------------------------------
     /**
-     * Displays the description of a package on a shelf.
+     * Displays package details or shelf stamp information.
      *
      * @param description
-     *            the description to display
+     *            the package information to display
      */
     public void printPackage(String description)
     {

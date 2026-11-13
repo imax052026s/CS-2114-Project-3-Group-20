@@ -1,16 +1,12 @@
 package game;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 // -------------------------------------------------------------------------
 /**
- * Represents a single package with a weight, dimensions, destination,
- * contents, the properties those contents imply (fragile, flammable, keep
- * dry, safe), the stamps the player applied, and the stamps that should have
- * been applied.
+ * Represents a single package with a weight, dimensions, destination, contents,
+ * the properties those contents imply (fragile, flammable, keep dry, safe), the
+ * stamps the player applied, and the stamps that should have been applied.
  *
  * @author Group 20
  * @version 2026.11.12
@@ -18,133 +14,86 @@ import java.util.Random;
 public class Package
 {
     // ~ Fields ................................................................
-
-    /** Maximum number of stamps that fit on one package. */
-    public static final int MAX_STAMPS = 20;
-
-    /** Points lost when an unsafe package is processed instead of denied. */
-    public static final int UNSAFE_PENALTY = -5;
-
-    private static final int MAX_CONTENTS = 5;
-    private static final int UNSAFE_ODDS = 5;
-    private static final int LIGHT_LIMIT = 10;
-    private static final int MEDIUM_LIMIT = 20;
-    private static final int SMALL_LIMIT = 2000;
-    private static final int MEDIUM_SIZE_LIMIT = 5000;
-
-    private static final String[] DESTINATIONS = { "Virginia Beach",
-        "Chesapeake", "Arlington", "Richmond", "Norfolk", "Newport News",
-        "Alexandria", "Hampton", "Suffolk", "Roanoke" };
-
-    // Every array below is indexed the same way as CONTENT_NAMES.
-    private static final String[] CONTENT_NAMES = { "Candy", "Clothes",
-        "Fireworks", "Painting", "Shoes", "Gas", "Stuffed Animal", "Chips",
-        "Live Snake", "Live Bird", "Glass Cup", "Charger", "Letter",
-        "Unidentified Bugs", "Ceramic Mug", "Camera", "Pencils", "Battery" };
-    private static final boolean[] FRAGILE = flags(8, 9, 10, 14, 15);
-    private static final boolean[] FLAMMABLE = flags(2, 5, 11, 17);
-    private static final boolean[] KEEP_DRY = flags(3, 8, 9, 11, 15, 17);
-    private static final boolean[] UNSAFE = flags(2, 5, 8, 9, 13);
-
-    private final int weight;
-    private final int length;
-    private final int width;
-    private final int height;
-    private final String destination;
-    private final boolean isFragile;
-    private final boolean isFlammable;
-    private final boolean keepDry;
-    private final boolean isSafe;
-    private final String[] contents;
-    private final String[] actualStamps;
+    private int weight;
+    private int length;
+    private int width;
+    private int height;
+    private String destination;
+    private boolean isFragile;
+    private boolean isFlammable;
+    private boolean keepDry;
+    private boolean isSafe;
+    private String[] contents;
     private String[] stampsApplied;
     private int numStamps;
+    private String[] actualStamps;
 
     // ~ Constructors ..........................................................
 
     // ----------------------------------------------------------
     /**
-     * Creates a package with random properties.
+     * Creates a package with random weight (1-30 lbs), dimensions, destination,
+     * and 1 to 5 random contents, and determines the stamps required for
+     * grading.
      */
     public Package()
     {
-        this(new Random());
-    }
+        Random random = new Random();
 
+        // Random Weight
+        weight = random.nextInt(30) + 1;
 
-    // ----------------------------------------------------------
-    /**
-     * Creates a package with random properties drawn from the given random
-     * number generator. Using a seeded generator gives repeatable packages.
-     *
-     * @param random
-     *            the source of randomness
-     */
-    public Package(Random random)
-    {
-        this(random.nextInt(30) + 1, random.nextInt(27) + 4,
-            random.nextInt(8) + 3, random.nextInt(18) + 3,
-            randomDestination(random), randomContents(random));
-    }
+        // Random Size
+        length = random.nextInt(27) + 4;
+        width = random.nextInt(8) + 3;
+        height = random.nextInt(18) + 3;
 
+        // Random Destination
+        String[] possibleDestinations = { "Virginia Beach", "Chesapeake",
+            "Arlington", "Richmond", "Norfolk", "Newport News", "Alexandria",
+            "Hampton", "Suffolk", "Roanoke" };
+        destination =
+            possibleDestinations[random.nextInt(possibleDestinations.length)];
 
-    // ----------------------------------------------------------
-    /**
-     * Creates a package with the given properties. The fragile, flammable,
-     * keep dry and safe properties and the correct stamps are worked out from
-     * the contents, weight, size and destination.
-     *
-     * @param weight
-     *            weight of the package
-     * @param length
-     *            length of the package
-     * @param width
-     *            width of the package
-     * @param height
-     *            height of the package
-     * @param destination
-     *            where the package is going
-     * @param contents
-     *            the items inside the package
-     */
-    public Package(
-        int weight,
-        int length,
-        int width,
-        int height,
-        String destination,
-        String[] contents)
-    {
-        this.weight = weight;
-        this.length = length;
-        this.width = width;
-        this.height = height;
-        this.destination = destination == null ? "Unknown" : destination;
-        this.contents = contents == null ? new String[0] : contents.clone();
-
-        boolean fragile = false;
-        boolean flammable = false;
-        boolean dry = false;
-        boolean safe = true;
-        for (int i = 0; i < this.contents.length; i++)
+        // Random Contents and Corresponding Labels
+        String[] possibleContents = { "Candy", "Clothes", "Fireworks",
+            "Painting", "Shoes", "Gas", "Stuffed Animal", "Chips", "Live Snake",
+            "Live Bird", "Glass Cup", "Charger", "Letter", "Unidentified Bugs",
+            "Ceramic Mug", "Camera", "Pencils", "Battery" };
+        boolean[] fragility =
+            { false, false, false, false, false, false, false, false, true,
+                true, true, false, false, false, true, true, false, false };
+        boolean[] flammability =
+            { false, false, true, false, false, true, false, false, false,
+                false, false, true, false, false, false, false, false, true };
+        boolean[] dryNeeds =
+            { false, false, false, true, false, false, false, false, true, true,
+                false, true, false, false, false, true, false, true };
+        boolean[] safety = { true, true, false, true, true, false, true, true,
+            false, false, true, true, true, false, true, true, true, true };
+        isFragile = false;
+        isFlammable = false;
+        keepDry = false;
+        isSafe = true;
+        int numContents = random.nextInt(5) + 1;
+        contents = new String[numContents];
+        for (int i = 0; i < numContents; i++)
         {
-            int index = indexOfContent(this.contents[i]);
-            if (index >= 0)
-            {
-                fragile = fragile || FRAGILE[index];
-                flammable = flammable || FLAMMABLE[index];
-                dry = dry || KEEP_DRY[index];
-                safe = safe && !UNSAFE[index];
-            }
+            int index = random.nextInt(possibleContents.length);
+            contents[i] = possibleContents[index];
+            isFragile = isFragile || fragility[index];
+            isFlammable = isFlammable || flammability[index];
+            keepDry = keepDry || dryNeeds[index];
+            isSafe = isSafe && safety[index];
         }
-        isFragile = fragile;
-        isFlammable = flammable;
-        keepDry = dry;
-        isSafe = safe;
 
-        stampsApplied = new String[MAX_STAMPS];
+        // Create List for Stamps the User Applies
+
+        stampsApplied = new String[10];
         numStamps = 0;
-        actualStamps = new String[MAX_STAMPS];
+
+        // Create Lift of Actually Needed Stamps for Grading
+        actualStamps = new String[10];
         int count = 0;
         if (isFragile)
         {
@@ -158,17 +107,39 @@ public class Package
         {
             actualStamps[count++] = "Keep Dry";
         }
-        actualStamps[count++] = weightStamp();
-        actualStamps[count++] = sizeStamp();
-        actualStamps[count++] = this.destination;
+        if (weight < 10)
+        {
+            actualStamps[count++] = "Light Load";
+        }
+        else if (weight < 20)
+        {
+            actualStamps[count++] = "Medium Load";
+        }
+        else
+        {
+            actualStamps[count++] = "Heavy Load";
+        }
+        if (measure() < 2000)
+        {
+            actualStamps[count++] = "Small";
+        }
+        else if (measure() < 5000)
+        {
+            actualStamps[count++] = "Medium";
+        }
+        else
+        {
+            actualStamps[count++] = "Large";
+        }
+        actualStamps[count++] = destination;
     }
-
 
     // ~ Public Methods ........................................................
 
+
     // ----------------------------------------------------------
     /**
-     * Returns the weight of this package.
+     * Returns the weight of this package in lbs.
      *
      * @return the weight
      */
@@ -180,7 +151,8 @@ public class Package
 
     // ----------------------------------------------------------
     /**
-     * Returns the volume of this package (length * width * height).
+     * Returns the volume of this package in cubic inches (length * width *
+     * height).
      *
      * @return the volume
      */
@@ -214,18 +186,23 @@ public class Package
         {
             return "No contents";
         }
-        return join(contents, contents.length);
+        String str = "";
+        for (int i = 0; i < contents.length - 1; i++)
+        {
+            str += contents[i] + ", ";
+        }
+        return str + contents[contents.length - 1];
     }
 
 
     // ----------------------------------------------------------
     /**
-     * Adds a stamp to this package.
+     * Adds a stamp to this package (up to a maximum of 10 stamps).
      *
      * @param newStamp
      *            the name of the stamp to add
-     * @return true if the stamp was added, false if the stamp is null or
-     *         empty or there is no room left for more stamps
+     * @return true if the stamp was added, false if the stamp is null or empty
+     *             or there is no room left for more stamps
      */
     public boolean addStamp(String newStamp)
     {
@@ -245,11 +222,12 @@ public class Package
 
     // ----------------------------------------------------------
     /**
-     * Grades the stamps the player applied. The player gains a point for each
-     * stamp that is also a correct stamp (duplicates are counted separately)
-     * and loses a point for each extra stamp and each missed stamp. An unsafe
-     * package scores {@link #UNSAFE_PENALTY} no matter what, because it
-     * should have been denied. A package with no stamps scores 0.
+     * Grades the stamps the player applied. If the package is unsafe, returns
+     * -5 regardless of applied stamps because it should have been denied.
+     * Otherwise, the player gains 1 point for each applied stamp that matches a
+     * required stamp (duplicates beyond the required count are penalized) and
+     * loses 1 point for each extra stamp and each missed stamp. Note that
+     * grading clears matched entries from the internal expected stamps array.
      *
      * @return the score for this package
      */
@@ -257,23 +235,17 @@ public class Package
     {
         if (!isSafe)
         {
-            return UNSAFE_PENALTY;
+            return -5;
         }
-        if (numStamps == 0)
-        {
-            return 0;
-        }
-        boolean[] matched = new boolean[actualStamps.length];
         int score = 0;
         for (int i = 0; i < numStamps; i++)
         {
             boolean found = false;
             for (int j = 0; j < actualStamps.length && !found; j++)
             {
-                if (actualStamps[j] != null && !matched[j]
-                    && actualStamps[j].equals(stampsApplied[i]))
+                if (stampsApplied[i].equals(actualStamps[j]))
                 {
-                    matched[j] = true;
+                    actualStamps[j] = null;
                     found = true;
                     score++;
                 }
@@ -285,7 +257,7 @@ public class Package
         }
         for (int j = 0; j < actualStamps.length; j++)
         {
-            if (actualStamps[j] != null && !matched[j])
+            if (actualStamps[j] != null)
             {
                 score--;
             }
@@ -306,169 +278,11 @@ public class Package
         {
             return "No stamps";
         }
-        return join(stampsApplied, numStamps);
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Returns whether the contents of this package are safe to ship.
-     *
-     * @return true if the package is safe
-     */
-    public boolean isSafe()
-    {
-        return isSafe;
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Returns how many stamps have been applied to this package.
-     *
-     * @return the number of applied stamps
-     */
-    public int getNumStamps()
-    {
-        return numStamps;
-    }
-
-
-    // ----------------------------------------------------------
-    /**
-     * Returns a copy of the stamps that should be applied to this package.
-     * Used for testing; the game never shows these to the player.
-     *
-     * @return the correct stamps
-     */
-    String[] getRequiredStamps()
-    {
-        int count = 0;
-        while (count < actualStamps.length && actualStamps[count] != null)
+        String str = "";
+        for (int i = 0; i < numStamps - 1; i++)
         {
-            count++;
+            str += stampsApplied[i] + ", ";
         }
-        String[] result = new String[count];
-        for (int i = 0; i < count; i++)
-        {
-            result[i] = actualStamps[i];
-        }
-        return result;
-    }
-
-
-    // ~ Private Methods .......................................................
-
-    private String weightStamp()
-    {
-        if (weight < LIGHT_LIMIT)
-        {
-            return "Light Load";
-        }
-        else if (weight < MEDIUM_LIMIT)
-        {
-            return "Medium Load";
-        }
-        return "Heavy Load";
-    }
-
-
-    private String sizeStamp()
-    {
-        int volume = measure();
-        if (volume < SMALL_LIMIT)
-        {
-            return "Small";
-        }
-        else if (volume < MEDIUM_SIZE_LIMIT)
-        {
-            return "Medium";
-        }
-        return "Large";
-    }
-
-
-    private static String join(String[] items, int count)
-    {
-        StringBuilder str = new StringBuilder();
-        for (int i = 0; i < count; i++)
-        {
-            if (i > 0)
-            {
-                str.append(", ");
-            }
-            str.append(items[i]);
-        }
-        return str.toString();
-    }
-
-
-    private static boolean[] flags(int... trueIndexes)
-    {
-        boolean[] result = new boolean[CONTENT_NAMES.length];
-        for (int i = 0; i < trueIndexes.length; i++)
-        {
-            result[trueIndexes[i]] = true;
-        }
-        return result;
-    }
-
-
-    private static int indexOfContent(String item)
-    {
-        for (int i = 0; i < CONTENT_NAMES.length; i++)
-        {
-            if (CONTENT_NAMES[i].equals(item))
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-
-    private static String randomDestination(Random random)
-    {
-        return DESTINATIONS[random.nextInt(DESTINATIONS.length)];
-    }
-
-
-    /**
-     * Picks one to five different items. Roughly one package in five holds at
-     * least one unsafe item; the rest hold only safe items, so the player is
-     * not buried in packages that must be denied.
-     */
-    private static String[] randomContents(Random random)
-    {
-        List<Integer> safeItems = new ArrayList<Integer>();
-        List<Integer> unsafeItems = new ArrayList<Integer>();
-        for (int i = 0; i < CONTENT_NAMES.length; i++)
-        {
-            if (UNSAFE[i])
-            {
-                unsafeItems.add(i);
-            }
-            else
-            {
-                safeItems.add(i);
-            }
-        }
-        Collections.shuffle(safeItems, random);
-        Collections.shuffle(unsafeItems, random);
-
-        int count = random.nextInt(MAX_CONTENTS) + 1;
-        List<String> chosen = new ArrayList<String>();
-        if (random.nextInt(UNSAFE_ODDS) == 0)
-        {
-            chosen.add(CONTENT_NAMES[unsafeItems.get(0)]);
-        }
-        int next = 0;
-        while (chosen.size() < count)
-        {
-            chosen.add(CONTENT_NAMES[safeItems.get(next)]);
-            next++;
-        }
-        Collections.shuffle(chosen, random);
-        return chosen.toArray(new String[chosen.size()]);
+        return str + stampsApplied[numStamps - 1];
     }
 }
