@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 // -------------------------------------------------------------------------
 /**
@@ -18,13 +19,16 @@ public class Model
     private Package[][] shelves;
     private ArrayList<Integer> scores;
     private Package currentPackage;
+    private String shipmentDestination;
+    private int currentScore;
 
     // ~ Constructors ..........................................................
 
     // ----------------------------------------------------------
     /**
      * Creates a model with empty package queues, an empty 5x5 grid of shelves,
-     * no recorded scores, and no package currently being processed.
+     * no recorded scores, no package currently being processed, and no shipment
+     * destination.
      */
     public Model()
     {
@@ -33,6 +37,7 @@ public class Model
         shelves = new Package[5][5];
         scores = new ArrayList<Integer>();
         currentPackage = null;
+        currentScore = 0;
     }
 
     // ~ Public Methods ........................................................
@@ -47,6 +52,12 @@ public class Model
     {
         checkQueue();
         currentPackage = null;
+        String[] possibleDestinations = { "Virginia Beach", "Chesapeake",
+            "Arlington", "Richmond", "Norfolk", "Newport News", "Alexandria",
+            "Hampton", "Suffolk", "Roanoke" };
+        shipmentDestination = possibleDestinations[new Random()
+            .nextInt(possibleDestinations.length)];
+        currentScore = 0;
     }
 
 
@@ -210,11 +221,26 @@ public class Model
      */
     public int calculateScore()
     {
-        int totalScore = 0;
+        int totalScore = currentScore;
         for (int i = 0; i < 30 && !processedPackages.isEmpty(); i++)
         {
+            if (!processedPackages.peek().readDestination()
+                .equals(shipmentDestination))
+            {
+                totalScore -= 3;
+            }
             totalScore += processedPackages.dequeue().gradeStamps();
         }
+        for (int i = 0; i < processedPackages.size(); i++)
+        {
+            Package p = processedPackages.dequeue();
+            processedPackages.enqueue(p);
+            if (p.getPriorityStatus())
+            {
+                totalScore -= 5;
+            }
+        }
+
         scores.add(totalScore);
         return totalScore;
     }
@@ -254,6 +280,23 @@ public class Model
     {
         currentPackage = unprocessedPackages.dequeue();
         return currentPackage != null;
+    }
+
+
+    // ----------------------------------------------------------
+    /**
+     * Returns the priority status of the package being processed.
+     *
+     * @return priority status of package being processed or false no package is
+     *             being processed
+     */
+    public boolean getPriorityStatus()
+    {
+        if (currentPackage == null)
+        {
+            return false;
+        }
+        return currentPackage.getPriorityStatus();
     }
 
 
@@ -346,6 +389,12 @@ public class Model
      */
     public void denyPackage()
     {
+        if (currentPackage.getPriorityStatus()) {
+            currentScore++;
+        }
+        else {
+            currentScore--;
+        }
         currentPackage = null;
     }
 

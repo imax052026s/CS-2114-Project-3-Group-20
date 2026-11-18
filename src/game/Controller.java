@@ -59,6 +59,10 @@ public class Controller
                     if (choice == 'A')
                     {
                         model.startProcessing();
+                        if (model.getPriorityStatus())
+                        {
+                            view.printPriorityPackage();
+                        }
                         boolean processing = true;
                         while (processing)
                         {
