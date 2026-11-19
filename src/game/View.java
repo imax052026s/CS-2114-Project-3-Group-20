@@ -52,6 +52,7 @@ public class View
         System.out.println("D) Place a package on a shelf");
         System.out.println("E) Remove a package from a shelf");
         System.out.println("F) End Day");
+        System.out.println("G) Accept a priority package drop-off");
         System.out.print("Enter a choice from the menu: ");
     }
 

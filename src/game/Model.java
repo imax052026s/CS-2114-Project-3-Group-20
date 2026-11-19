@@ -74,6 +74,19 @@ public class Model
         unprocessedPackages.enqueue(new Package());
     }
 
+    /**
+     * Creates a priority package and adds it to the front
+     * of the unprocessed package queue.
+     *
+     * @return true if the package was successfully added
+     */
+    public boolean acceptPriorityDropOff()
+    {
+        Package priorityPackage = new Package(true);
+
+        return unprocessedPackages.enqueueFront(priorityPackage);
+    }
+
 
     // ----------------------------------------------------------
     /**

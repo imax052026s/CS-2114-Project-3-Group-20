@@ -56,7 +56,7 @@ public class Controller
                 {
                     model.checkQueue();
                     view.printGameMenu();
-                    choice = readMenuOption(6);
+                    choice = readMenuOption(7);
                     if (choice == 'A')
                     {
                         model.startProcessing();
@@ -393,6 +393,20 @@ public class Controller
                     {
                         view.printMessage("Score: " + model.calculateScore());
                         day = false;
+                    }
+                    else if (choice == 'G')
+                    {
+                        if (model.acceptPriorityDropOff())
+                        {
+                            view.printMessage(
+                                "A priority package has been accepted "
+                                    + "and moved to the front of the queue!");
+                        }
+                        else
+                        {
+                            view.printMessage(
+                                "The priority package could not be accepted.");
+                        }
                     }
                 }
             }

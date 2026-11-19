@@ -39,6 +39,11 @@ public class Package
      */
     public Package()
     {
+        this(new Random().nextBoolean());
+    }
+    
+    public Package(boolean priorityPackage)
+    {
         Random random = new Random();
 
         // Random Weight
@@ -76,7 +81,7 @@ public class Package
         isFlammable = false;
         keepDry = false;
         isSafe = true;
-        priority = random.nextBoolean();
+        priority = priorityPackage;
         
         int numContents = random.nextInt(5) + 1;
         contents = new String[numContents];
