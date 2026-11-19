@@ -25,7 +25,7 @@ The project also includes `QueueTest.java`, `PackageTest.java`, `ModelTest.java`
 
 ## How to Run
 
-### Running the Game
+### Compiling and Running the Game
 
 1. Open the project in Eclipse.
 2. Locate `Controller.java` inside `src/game`.
@@ -275,9 +275,9 @@ Our Deliverable 3 plan identified these stretch goals:
 | Feature | Plan |
 |---|---|
 | Priority processing | Selected Deliverable 4 change feature |
-| Priority shipping | Verify implementation and tests |
-| Shipments per location | Verify implementation and tests |
-| Timing challenge | Future stretch goal unless completed |
+| Priority shipping | Committed & Completed |
+| Shipments per location | Committed & Completed |
+| Timing challenge | Committed & Not Yet Completed |
 | Sorting shelves by rule | Dropped |
 
 ### Three-Minute Demo Walkthrough
