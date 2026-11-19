@@ -1,26 +1,20 @@
+
 package game;
 
-// -------------------------------------------------------------------------
 /**
- * A generic first-in, first-out queue implemented as a singly linked chain. New
- * entries are added to the back and removed from the front.
+ * A generic singly linked queue that supports normal FIFO
+ * processing and priority insertion at the front.
  *
- * @param <T>
- *            the type of entries stored in the queue
+ * @param <T> the type of entries stored in the queue
  * @author Group 20
- * @version 2026.11.12
+ * @version 2026.11.19
  */
 public class Queue<T>
 {
-    // ~ Fields ................................................................
-
     private Node<T> firstNode;
     private Node<T> lastNode;
     private int numberOfEntries;
 
-    // ~ Constructors ..........................................................
-
-    // ----------------------------------------------------------
     /**
      * Creates an empty queue.
      */
@@ -31,16 +25,11 @@ public class Queue<T>
         numberOfEntries = 0;
     }
 
-    // ~ Public Methods ........................................................
-
-
-    // ----------------------------------------------------------
     /**
-     * Adds a new entry to the back of this queue.
+     * Adds an entry to the back of the queue.
      *
-     * @param newEntry
-     *            the object to be added
-     * @return true if the entry was added, false if newEntry is null
+     * @param newEntry the entry to add
+     * @return true if successful, false if null
      */
     public boolean enqueue(T newEntry)
     {
@@ -48,7 +37,9 @@ public class Queue<T>
         {
             return false;
         }
+
         Node<T> newNode = new Node<T>(newEntry);
+
         if (isEmpty())
         {
             firstNode = newNode;
@@ -57,78 +48,100 @@ public class Queue<T>
         {
             lastNode.next = newNode;
         }
+
         lastNode = newNode;
         numberOfEntries++;
         return true;
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Removes and returns the entry at the front of this queue.
+     * Adds a priority entry to the front of the queue.
+     * The next dequeue will remove this entry first.
      *
-     * @return the removed entry, or null if the queue is empty
+     * @param newEntry the priority entry
+     * @return true if successful, false if null
+     */
+    public boolean enqueueFront(T newEntry)
+    {
+        if (newEntry == null)
+        {
+            return false;
+        }
+
+        Node<T> newNode = new Node<T>(newEntry);
+        newNode.next = firstNode;
+        firstNode = newNode;
+
+        if (lastNode == null)
+        {
+            lastNode = newNode;
+        }
+
+        numberOfEntries++;
+        return true;
+    }
+
+    /**
+     * Removes and returns the front entry.
+     *
+     * @return the removed entry, or null if empty
      */
     public T dequeue()
     {
-        if (firstNode == null)
+        if (isEmpty())
         {
             return null;
         }
-        T entry = firstNode.data;
+
+        T frontData = firstNode.data;
         firstNode = firstNode.next;
+        numberOfEntries--;
+
         if (firstNode == null)
         {
             lastNode = null;
         }
-        numberOfEntries--;
-        return entry;
+
+        return frontData;
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Returns the entry at the front of this queue without removing it.
+     * Returns the front entry without removing it.
      *
-     * @return the first entry, or null if the queue is empty
+     * @return the front entry, or null if empty
      */
     public T peek()
     {
-        if (firstNode == null)
+        if (isEmpty())
         {
             return null;
         }
+
         return firstNode.data;
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Returns the number of entries in this queue.
+     * Returns the number of entries.
      *
-     * @return the number of entries
+     * @return queue size
      */
     public int size()
     {
         return numberOfEntries;
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Returns whether this queue has no entries.
+     * Checks whether the queue is empty.
      *
-     * @return true if the queue is empty
+     * @return true if empty
      */
     public boolean isEmpty()
     {
         return numberOfEntries == 0;
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Removes every entry from this queue.
+     * Removes every entry from the queue.
      */
     public void clear()
     {
@@ -137,47 +150,25 @@ public class Queue<T>
         numberOfEntries = 0;
     }
 
-    // ~ Node class ............................................................
-
-    // -------------------------------------------------------------------------
     /**
-     * A single entry in the chain. Holds one piece of data and a link to the
-     * next node.
+     * Internal singly linked node.
      *
-     * @param <E>
-     *            the type of data held in the node
+     * @param <E> node data type
      */
     private static class Node<E>
     {
         private E data;
         private Node<E> next;
 
-        // ----------------------------------------------------------
         /**
-         * Creates a node with the given data and no next node.
+         * Creates a node containing data.
          *
-         * @param dataPortion
-         *            the entry to store
+         * @param data the stored value
          */
-        private Node(E dataPortion)
+        public Node(E data)
         {
-            this(dataPortion, null);
-        }
-
-
-        // ----------------------------------------------------------
-        /**
-         * Creates a node with the given data and next node.
-         *
-         * @param dataPortion
-         *            the entry to store
-         * @param nextNode
-         *            the node that follows this one
-         */
-        private Node(E dataPortion, Node<E> nextNode)
-        {
-            data = dataPortion;
-            next = nextNode;
+            this.data = data;
+            this.next = null;
         }
     }
 }

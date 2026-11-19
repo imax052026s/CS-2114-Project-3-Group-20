@@ -1,18 +1,19 @@
+
 package game;
 
-// -------------------------------------------------------------------------
+import student.TestCase;
+
 /**
- * Tests the Queue class.
+ * Tests the Queue class, including normal FIFO operations,
+ * priority processing, and invalid inputs.
  *
  * @author Group 20
- * @version 2026.11.12
+ * @version 2026.11.19
  */
-public class QueueTest
-    extends student.TestCase
+public class QueueTest extends TestCase
 {
     private Queue<String> queue;
 
-    // ----------------------------------------------------------
     /**
      * Creates an empty queue before each test.
      */
@@ -21,158 +22,293 @@ public class QueueTest
         queue = new Queue<String>();
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * A new queue is empty.
+     * Tests the constructor.
      */
     public void testConstructor()
     {
-        assertEquals(0, queue.size());
         assertTrue(queue.isEmpty());
+        assertEquals(0, queue.size());
         assertNull(queue.peek());
+        assertNull(queue.dequeue());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Enqueue adds to the back and counts entries.
+     * Tests adding normal entries.
      */
     public void testEnqueue()
     {
-        assertTrue(queue.enqueue("a"));
-        assertEquals(1, queue.size());
-        assertTrue(queue.enqueue("b"));
+        assertTrue(queue.enqueue("A"));
+        assertTrue(queue.enqueue("B"));
+
         assertEquals(2, queue.size());
-        assertEquals("a", queue.peek());
+        assertEquals("A", queue.peek());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Enqueueing null returns false and changes nothing.
+     * Tests rejecting null entries.
      */
     public void testEnqueueNull()
     {
         assertFalse(queue.enqueue(null));
-        assertEquals(0, queue.size());
         assertTrue(queue.isEmpty());
-        queue.enqueue("a");
+
+        queue.enqueue("A");
+
         assertFalse(queue.enqueue(null));
         assertEquals(1, queue.size());
+        assertEquals("A", queue.peek());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Dequeue removes entries first in, first out.
+     * Tests normal FIFO removal.
      */
     public void testDequeue()
     {
-        queue.enqueue("a");
-        queue.enqueue("b");
-        queue.enqueue("c");
-        assertEquals("a", queue.dequeue());
-        assertEquals(2, queue.size());
-        assertEquals("b", queue.dequeue());
-        assertEquals("c", queue.dequeue());
-        assertEquals(0, queue.size());
+        queue.enqueue("A");
+        queue.enqueue("B");
+        queue.enqueue("C");
+
+        assertEquals("A", queue.dequeue());
+        assertEquals("B", queue.dequeue());
+        assertEquals("C", queue.dequeue());
+
         assertTrue(queue.isEmpty());
+        assertEquals(0, queue.size());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Dequeueing an empty queue returns null.
+     * Tests removing from an empty queue.
      */
     public void testDequeueEmpty()
     {
         assertNull(queue.dequeue());
-        assertEquals(0, queue.size());
-        queue.enqueue("a");
-        queue.dequeue();
         assertNull(queue.dequeue());
         assertEquals(0, queue.size());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * The queue still works after being emptied by dequeue.
+     * Tests reusing a queue after emptying it.
      */
     public void testReuseAfterEmptying()
     {
-        queue.enqueue("a");
-        queue.dequeue();
-        assertTrue(queue.enqueue("b"));
-        assertEquals(1, queue.size());
-        assertEquals("b", queue.peek());
-        assertEquals("b", queue.dequeue());
+        queue.enqueue("A");
+        assertEquals("A", queue.dequeue());
+
+        assertTrue(queue.enqueue("B"));
+        assertEquals("B", queue.peek());
+        assertEquals("B", queue.dequeue());
+
+        assertTrue(queue.isEmpty());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Peek returns the front entry without removing it.
+     * Tests looking at the first entry.
      */
     public void testPeek()
     {
         assertNull(queue.peek());
-        queue.enqueue("a");
-        queue.enqueue("b");
-        assertEquals("a", queue.peek());
-        assertEquals("a", queue.peek());
+
+        queue.enqueue("A");
+        queue.enqueue("B");
+
+        assertEquals("A", queue.peek());
+        assertEquals("A", queue.peek());
         assertEquals(2, queue.size());
+
+        queue.dequeue();
+
+        assertEquals("B", queue.peek());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * isEmpty tracks whether entries exist.
+     * Tests the isEmpty method.
      */
     public void testIsEmpty()
     {
         assertTrue(queue.isEmpty());
-        queue.enqueue("a");
+
+        queue.enqueue("A");
         assertFalse(queue.isEmpty());
+
         queue.dequeue();
         assertTrue(queue.isEmpty());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Clear removes everything and the queue can be used again.
+     * Tests clearing a queue.
      */
     public void testClear()
     {
-        queue.enqueue("a");
-        queue.enqueue("b");
+        queue.enqueue("A");
+        queue.enqueue("B");
+
         queue.clear();
-        assertEquals(0, queue.size());
+
         assertTrue(queue.isEmpty());
+        assertEquals(0, queue.size());
         assertNull(queue.peek());
         assertNull(queue.dequeue());
-        queue.enqueue("c");
-        assertEquals("c", queue.dequeue());
+
+        assertTrue(queue.enqueue("C"));
+        assertEquals("C", queue.dequeue());
     }
 
-
-    // ----------------------------------------------------------
     /**
-     * Many entries stay in order.
+     * Tests clearing an already empty queue.
+     */
+    public void testClearEmpty()
+    {
+        queue.clear();
+        queue.clear();
+
+        assertTrue(queue.isEmpty());
+        assertEquals(0, queue.size());
+    }
+
+    /**
+     * Tests priority insertion into an empty queue.
+     */
+    public void testEnqueueFrontEmpty()
+    {
+        assertTrue(queue.enqueueFront("Priority"));
+
+        assertEquals(1, queue.size());
+        assertEquals("Priority", queue.peek());
+        assertEquals("Priority", queue.dequeue());
+
+        assertTrue(queue.isEmpty());
+    }
+
+    /**
+     * Tests priority insertion into a nonempty queue.
+     */
+    public void testEnqueueFrontNonEmpty()
+    {
+        queue.enqueue("A");
+        queue.enqueue("B");
+
+        assertTrue(queue.enqueueFront("Priority"));
+
+        assertEquals(3, queue.size());
+        assertEquals("Priority", queue.dequeue());
+        assertEquals("A", queue.dequeue());
+        assertEquals("B", queue.dequeue());
+
+        assertTrue(queue.isEmpty());
+    }
+
+    /**
+     * Tests rejecting null priority entries.
+     */
+    public void testEnqueueFrontNull()
+    {
+        assertFalse(queue.enqueueFront(null));
+        assertTrue(queue.isEmpty());
+
+        queue.enqueue("A");
+
+        assertFalse(queue.enqueueFront(null));
+        assertEquals(1, queue.size());
+        assertEquals("A", queue.peek());
+    }
+
+    /**
+     * Tests multiple priority entries.
+     */
+    public void testMultiplePriorityEntries()
+    {
+        queue.enqueue("Normal");
+        queue.enqueueFront("Priority1");
+        queue.enqueueFront("Priority2");
+
+        assertEquals(3, queue.size());
+
+        assertEquals("Priority2", queue.dequeue());
+        assertEquals("Priority1", queue.dequeue());
+        assertEquals("Normal", queue.dequeue());
+
+        assertTrue(queue.isEmpty());
+    }
+
+    /**
+     * Tests mixed normal and priority operations.
+     */
+    public void testInterleavedEnqueueDequeue()
+    {
+        queue.enqueue("A");
+        queue.enqueue("B");
+
+        assertEquals("A", queue.dequeue());
+
+        queue.enqueue("C");
+        queue.enqueueFront("Priority");
+
+        assertEquals("Priority", queue.dequeue());
+        assertEquals("B", queue.dequeue());
+
+        queue.enqueue("D");
+
+        assertEquals("C", queue.dequeue());
+        assertEquals("D", queue.dequeue());
+
+        assertNull(queue.dequeue());
+        assertTrue(queue.isEmpty());
+    }
+
+    /**
+     * Tests priority insertion after emptying the queue.
+     */
+    public void testPriorityAfterEmptying()
+    {
+        queue.enqueue("A");
+        queue.dequeue();
+
+        assertTrue(queue.enqueueFront("Priority"));
+        assertEquals("Priority", queue.peek());
+        assertEquals("Priority", queue.dequeue());
+
+        assertTrue(queue.enqueue("B"));
+        assertEquals("B", queue.dequeue());
+
+        assertTrue(queue.isEmpty());
+    }
+
+    /**
+     * Tests priority insertion after clearing the queue.
+     */
+    public void testPriorityAfterClear()
+    {
+        queue.enqueue("A");
+        queue.clear();
+
+        queue.enqueueFront("Priority");
+        queue.enqueue("B");
+
+        assertEquals("Priority", queue.dequeue());
+        assertEquals("B", queue.dequeue());
+
+        assertTrue(queue.isEmpty());
+    }
+
+    /**
+     * Tests a large number of entries.
      */
     public void testManyEntries()
     {
         for (int i = 0; i < 1000; i++)
         {
-            queue.enqueue("" + i);
+            assertTrue(queue.enqueue("Item" + i));
         }
+
         assertEquals(1000, queue.size());
+
         for (int i = 0; i < 1000; i++)
         {
-            assertEquals("" + i, queue.dequeue());
+            assertEquals("Item" + i, queue.dequeue());
         }
+
         assertTrue(queue.isEmpty());
+        assertEquals(0, queue.size());
     }
 }
