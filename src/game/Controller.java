@@ -49,7 +49,8 @@ public class Controller
             char choice = readMenuOption(2);
             if (choice == 'A')
             {
-                model.startDay();
+                String destination = model.startDay();
+                view.printVehicleDestination(destination);
                 boolean day = true;
                 while (day)
                 {

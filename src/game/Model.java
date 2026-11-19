@@ -47,8 +47,10 @@ public class Model
     /**
      * Starts a new day by ensuring the unprocessed queue has been checked for
      * new packages and clearing any package currently being processed.
+     * 
+     * @return the destination of the shipping vehicle
      */
-    public void startDay()
+    public String startDay()
     {
         checkQueue();
         currentPackage = null;
@@ -58,6 +60,7 @@ public class Model
         shipmentDestination = possibleDestinations[new Random()
             .nextInt(possibleDestinations.length)];
         currentScore = 0;
+        return shipmentDestination;
     }
 
 

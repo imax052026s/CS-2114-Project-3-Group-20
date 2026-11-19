@@ -276,7 +276,7 @@ public class View
      * @param destination
      *            destination of the package
      */
-    public void printDestination(String destination)
+    public void printPackageDestination(String destination)
     {
         System.out.println("Destination: " + destination);
     }
@@ -343,6 +343,21 @@ public class View
     {
         System.out.println("\n===== FINAL SCORE HISTORY =====");
         System.out.println(scores);
+    }
+
+
+    // ----------------------------------------------------------
+    /**
+     * Displays a general message.
+     *
+     * @param destination
+     *            text containing the destination of the shipping vehicle
+     */
+    public void printVehicleDestination(String destination)
+    {
+        System.out.println(
+            "\nToday's vehicle will be shipping packages to " + destination
+                + ".");
     }
 
 
