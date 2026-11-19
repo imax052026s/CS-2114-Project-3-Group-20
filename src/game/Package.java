@@ -23,6 +23,7 @@ public class Package
     private boolean isFlammable;
     private boolean keepDry;
     private boolean isSafe;
+    private boolean priority;
     private String[] contents;
     private String[] stampsApplied;
     private int numStamps;
@@ -75,6 +76,8 @@ public class Package
         isFlammable = false;
         keepDry = false;
         isSafe = true;
+        priority = random.nextBoolean();
+        
         int numContents = random.nextInt(5) + 1;
         contents = new String[numContents];
         for (int i = 0; i < numContents; i++)
@@ -284,5 +287,16 @@ public class Package
             str += stampsApplied[i] + ", ";
         }
         return str + stampsApplied[numStamps - 1];
+    }
+    
+ // ----------------------------------------------------------
+    /**
+     * Returns whether or not the package is a priority shipment.
+     *
+     * @return priority status
+     */
+    public boolean getPriorityStatus()
+    {
+        return priority;
     }
 }

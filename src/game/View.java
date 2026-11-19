@@ -297,6 +297,17 @@ public class View
 
     // ----------------------------------------------------------
     /**
+     * Displays the priority package message.
+     */
+    public void printPriorityPackage()
+    {
+        System.out.println(
+            "This package is a priority. Make sure this goes out on the first shipment");
+    }
+
+
+    // ----------------------------------------------------------
+    /**
      * Displays a message confirming a stamp was added.
      *
      * @param stamp

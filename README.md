@@ -1,149 +1,342 @@
-# CS2114 Project 3, Group 20: PRECISION POST
+# CS 2114 Project 3 — Group 20: PRECISION POST
 
-Precision Post is a console mailroom game. Packages line up in a queue. For each one you weigh it, measure it, read its destination and contents, and apply the correct stamps (weight class, size class, destination, and special stamps like Fragile). Unsafe packages must be denied. At the end of the day the first 30 processed packages are scored and the score is recorded.
+## Project Overview
 
-All code is in the `game` package under `src`.
+Precision Post is a console-based mailroom simulation game. Players process packages in arrival order by weighing them, measuring their dimensions, checking their contents and destinations, and applying the appropriate shipping stamps. Unsafe packages must be denied.
 
-| Class | Role |
-| --- | --- |
-| `Queue` (with a private nested `Node`) | Generic singly linked FIFO queue |
-| `Package` | One package: weight, size, destination, contents, stamps, grading |
-| `Model` | Game state: two queues of packages, 5x5 shelves, current package, daily scores |
-| `View` | Prints menus, package info and scores. Never reads input and never touches the model |
-| `Controller` | Reads and checks input, calls the model, tells the view what to print |
+Players can also place packages on shelves, retrieve them, and review their scores. At the end of each day, up to 30 processed packages are graded based on the accuracy of their stamps.
 
-## How to run
+The game follows the Model-View-Controller (MVC) architecture to separate game logic, user interaction, and presentation.
 
-### The model on its own (no view)
+## Project Structure
 
-The model does not import or call `View` or `Controller`, so it runs from tests alone:
+All Java files are located in the `game` package under `src`.
 
-1. In Eclipse, right-click `ModelTest.java` and choose Run As, then JUnit Test.
-2. Do the same for `QueueTest.java` and `PackageTest.java` to run the Queue and Package tests.
+| Class | Responsibility |
+|---|---|
+| `Queue.java` | Generic singly linked queue supporting FIFO operations and priority insertion |
+| `Node` | Private nested class within Queue that stores data and a reference to the next node |
+| `Package.java` | Stores package information, stamps, safety properties, and grading logic |
+| `Model.java` | Manages package queues, shelves, current packages, and scoring |
+| `View.java` | Displays menus, package information, instructions, and scores |
+| `Controller.java` | Handles user input, manages game flow, and communicates between Model and View |
 
-These tests create a `Model`, load it with packages, process them, shelve them, score the day and check the results. No console and no view is involved.
+The project also includes `QueueTest.java`, `PackageTest.java`, `ModelTest.java`, `ViewTest.java`, and `ControllerTest.java`.
 
-### The thin console view
+## How to Run
 
-1. Run `Controller.java` (Run As, then Java Application).
-2. Menus use letters. At the opening menu enter `A` to start a new day or `B` to leave.
-3. During a day: `A` process the next package, `B` show the shelves, `C` look at a package on a shelf, `D` place a processed package on a shelf, `E` take a package off a shelf, `F` end the day and see your score.
-4. While processing a package: `A` weigh, `B` measure, `C` contents, `D` destination, `E` add a stamp (pick a letter from the stamp menu, or `T` to go back), `F` deny the package, `G` finish processing it.
-5. Leaving the game prints the score for every day.
+### Running the Game
 
-`ViewTest` and `ControllerTest` run the view and controller with typed input, no keyboard needed. To run every test at once, right-click the `src` folder and choose Run As, then JUnit Test.
+1. Open the project in Eclipse.
+2. Locate `Controller.java` inside `src/game`.
+3. Right-click `Controller.java`.
+4. Select **Run As → Java Application**.
+5. Follow the instructions in the console.
+
+At the opening menu, select `A` to start a new day or `B` to exit.
+
+The original gameplay menu provides options to process the next package, view shelves, inspect a shelf, place or remove packages, and end the day.
+
+While processing a package, players can weigh it, measure it, inspect its contents and destination, add stamps, deny the package, or finish processing it.
+
+The priority-processing menu option will become available once the Controller and Model integrations are completed.
+
+### Running the Tests
+
+1. Open Eclipse.
+2. Locate the test class inside `src/game`.
+3. Right-click the test class.
+4. Select **Run As → JUnit Test**.
+5. Check the JUnit results for errors and failures.
+
+Repeat this for the other test classes, or run the complete test suite from the project.
+
+The project uses the `student.TestCase` testing framework.
+
+The Queue tests have been updated to cover priority processing and existing FIFO behavior.
+
+### Running the Model Independently
+
+The Model, Queue, and Package classes do not depend directly on the View or Controller.
+
+To test the Model independently, run `ModelTest.java`. The tests exercise the game's state and logic without requiring console interaction.
+
+This demonstrates that the Model can operate independently from the user interface.
+
+---
 
 ## Reflection
 
-### What changed from the specification?
+### What Changed from the Original Specification?
 
-**Queue and Node.** We added `clear()`, which the spec did not list, so queues can be emptied when needed.
+**Queue and Node**
 
-**Package.**
-- The spec called for a `Stamp` class (`addStamp(Stamp)`) and arrays of size 20 for `stampsApplied` and `actualStamps`. We used plain `String` stamp names (`addStamp(String)`), because stamps only need a name, and sized both arrays to 10 slots. `addStamp` returns `false` for null or blank names or when the 10 stamp slots are full. This change occurred because we realized a package should only have 6 stamps at most and does not need 20 slots for stamps.
-- We added a `numStamps` counter and a `viewStamps()` method (not listed in the spec) so shelf inspection can display the stamps applied to a package as a comma-separated list.
-- `gradeStamps` follows the spec (1 point per correct stamp, minus 1 point per extra or missed stamp). Unlike the spec's method note claiming an empty `stampsApplied` list returns 0, an unstamped safe package loses 1 point per missed stamp to match the scoring rules. An unsafe package that is processed scores -5, which is in our instructions but was not in the method spec. 
+The original specification described a singly linked FIFO queue. We implemented this structure using a private nested Node class and added `clear()` to support resetting the queue.
 
-**Model.**
-- The spec had `addStampToPackage` return `void`. It returns `boolean` so the controller can tell the player there is no room for an additional stamp.
-- The spec did not list `startProcessing`, `denyPackage` or `finishProcessing`, but the MVP flow needs them. `startProcessing` returns `boolean` so an empty queue cannot hand back a null package.
-- In the spec, `startDay()` initialized `unprocessedPackages` with random packages and cleared `processedPackages` and `shelves`. Currently, `startDay()` calls `checkQueue()` and clears `currentPackage` without wiping existing queues or shelves. 
-- In the spec, `viewShelf(int, int)` returned a package's contents, size, weight, and destination; our implementation calls `viewStamps()` to display the stamps applied to the shelved package.
+For Deliverable 4, we added `enqueueFront(T newEntry)` to support priority processing. This method inserts an entry at the front of the queue so that it will be removed before regular entries.
 
-**Controller.**
-- The spec listed `private Controller()` and only a `scanner` field. We made `Controller()` `public` so `main` and tests can instantiate it, stored `view` and `model` as fields, and moved the game loop into `private void run()`. 
-- The spec had `readMenuOption()` with no parameters; we changed it to `readMenuOption(int numOptions)` so each menu validates against its own number of valid letters. 
-- The spec said `readInt()` returns `-1` on bad input, while the Validation section said it keeps asking until the input is valid. We implemented `public int readIntOption(int min, int max)` to validate range on a single input and return `-1` on invalid input, while the loops in `run()` handle re-prompting until a valid integer is entered. 
-- We added a "Go Back" choice (`T`) to the stamp menu so a mistaken click does not force a stamp onto the package.
+The existing `enqueue`, `dequeue`, `peek`, `size`, `isEmpty`, and `clear` methods were preserved.
 
-**View.** The spec's system diagram showed `View<T>`, which we implemented as a non-generic `View` class. Beyond the 6 print methods in the spec, we added prompt and feedback helpers (`printIntError`, `printLeaveGame`, `printReadShelfNumber`, `printReadShelveNumber`, `printShelves`, `printPackage`, `printMessage`) as well as typed print methods (`printWeight`, `printVolume`, `printDestination`, `printContents`, `printStampAdded`, `printScore`, `printFinalScore`). `Controller` calls `printFinalScore` on exit and routes package details and daily scores through `printPackage` and `printMessage`. 
+The change did not require a separate Node class or a complete redesign of the queue.
 
-**Where validation lives.** The `Package.addStamp` method now also rejects null and blank names.
+**Package**
 
-**Tests.** The spec's test plan listed an `OutOfMemoryError` case for the Model constructor and a "package generation fails" case in `addToQueue()`. We cannot force either, so they are not tested directly. The "shelves are null" cases are tested by setting the field to null with reflection. All test classes (`QueueTest`, `PackageTest`, `ModelTest`, `ViewTest`, and `ControllerTest`) extend `student.TestCase`. 
+The original specification proposed a separate Stamp class and arrays containing 20 stamps. We instead represented stamps using strings and used a maximum capacity of 10.
 
-The spec's bad input "trying to run commands after the time system has run out" assumed a timer. There is no timer yet, so we apply it to commands after the day has ended: the day menu only offers Start and Leave, so day commands cannot be entered once the day is over.
+We added a stamp counter and `viewStamps()` to display applied stamps.
 
-### Did the model really stand alone?
+The `addStamp()` method rejects invalid stamp names and attempts to exceed the maximum capacity.
 
-Yes for dependencies. `Model`, `Package` and `Queue` never import, create or call `View` or `Controller`, and `ModelTest` exercises all of the game logic without them. Nothing had to move across the line to make it run.
+For grading, correct stamps receive positive points while incorrect or missing stamps receive penalties. Processing an unsafe package results in a negative score.
 
-There is one place where the model still knows about presentation. `Model.viewShelves()` builds the ASCII picture of the shelves, and some Model methods return user-facing sentences such as "No package currently being processed" and "Invalid shelf position". The spec asked for these, but they are display decisions that arguably belong to the view. Changing them would mean the model returns data and the view formats it.
+**Model**
 
-### What happened to our unknowns?
+The original specification did not explicitly include every method required for the complete processing flow.
 
-We listed two unknowns: how to build a real-time clock for the player, and how to run the clock alongside the main loop while waiting for input. **Both are still open.** We did not attempt the timer in this deliverable, because it is a stretch goal and the MVP did not need it.
+We added methods such as `startProcessing()`, `finishProcessing()`, and `denyPackage()` to support gameplay.
 
-### What doesn't work yet?
+We also changed `addStampToPackage()` to return a boolean so that the Controller can determine whether a stamp was successfully added.
 
-- No timer or timed day (stretch goal).
-- `Model.startDay()` only calls `checkQueue()` once (adding 1 package if fewer than 3 are queued) rather than refilling the queue to 3 packages at the start of a new day, and `Model` does not yet manage how leftover processed or shelved packages carry over between days.
-- Denying a package is free. Denying a safe package costs nothing and denying an unsafe package earns nothing, so denying everything scores 0.
-- The MVP says stamping happens before the user continues, but "finish" is allowed with zero stamps.
+The planned Deliverable 4 integration adds `addPriorityPackage()`, which creates a new package and places it at the front of the unprocessed queue.
+
+**Controller**
+
+The Controller was expanded to manage the game loop and validate menu input.
+
+We changed the menu-reading logic to support different numbers of options and added validation for integer inputs.
+
+For Deliverable 4, the planned change is a new priority-processing menu option that calls the Model rather than manipulating the Queue directly.
+
+**View**
+
+The View was expanded beyond the original specification to include additional menus, prompts, error messages, and package information.
+
+For Deliverable 4, the planned changes include a priority-arrival message and an improved end-of-day summary.
+
+### Deliverable 4 Change Feature: Priority Processing
+
+Our selected change feature is priority processing, which was identified in our Deliverable 3 Next Steps.
+
+Previously, all packages were added to the back of the queue and processed in FIFO order.
+
+The new `enqueueFront()` method allows a priority package to be inserted at the front of the queue.
+
+For example, if the queue contains packages A, B, and C, adding priority package P changes the processing order from:
+
+`A → B → C`
+
+to:
+
+`P → A → B → C`
+
+This changes the underlying queue behavior without affecting ordinary package processing.
+
+The planned integration is:
+
+1. The Controller receives a priority-package request.
+2. The Controller calls `Model.addPriorityPackage()`.
+3. The Model creates a package and calls `Queue.enqueueFront()`.
+4. The next package-processing operation removes the priority package first.
+5. The View displays the appropriate information.
+
+The Queue implementation is complete. The Model and Controller integration must be verified before submission.
+
+### Testing and Validation
+
+We expanded `QueueTest.java` to test the existing queue methods and the new priority-processing functionality.
+
+The additional tests cover:
+
+- Priority insertion into an empty queue
+- Priority insertion into a nonempty queue
+- Null priority entries
+- Multiple priority entries
+- Interleaved enqueue and dequeue operations
+- Priority insertion after the queue becomes empty
+- Priority insertion after clearing the queue
+- Normal FIFO ordering
+- Queue size and empty-state behavior
+- Large numbers of entries
+
+The new tests confirm that priority insertion does not interfere with ordinary FIFO behavior.
+
+During development, the Queue tests were adapted to the project's `student.TestCase` framework.
+
+The Eclipse test run showed zero errors and zero failures, although the displayed count was 43/44. The final complete test count must be verified after integration.
+
+The final Model tests should verify that priority packages are processed before regular packages and that invalid operations are handled safely.
+
+The final Controller tests should verify that the priority-processing option works and invalid menu selections do not crash the program.
+
+### Model/View Boundary
+
+The project follows MVC architecture.
+
+The Model stores and updates game state, including package queues, shelves, and scores.
+
+The Controller receives user input and communicates with the Model and View.
+
+The View displays information to the user.
+
+The Queue does not directly interact with either the Controller or View.
+
+The priority-processing feature maintains this separation because the Controller communicates with the Model, and the Model uses the Queue.
+
+One remaining design limitation is that some Model methods return formatted text, such as shelf displays and error messages. A future improvement would move more formatting responsibilities into the View.
+
+### Differences from Our Deliverable 3 Predictions
+
+Our Deliverable 3 plan predicted that priority processing would require changes to Queue, Model, Controller, and View.
+
+The Queue change matched our prediction: adding `enqueueFront()` was sufficient to support front insertion.
+
+We did not need to change the existing `dequeue()` method because it already removes the first entry.
+
+We also did not need to create a separate Node class.
+
+The remaining integration should use the planned Model and Controller methods.
+
+### Design Improvement for Future Features
+
+A useful future improvement would be to represent package priority as a property of the Package class and centralize scheduling decisions inside the Model.
+
+This would make it easier to support multiple priority levels without changing the Controller or View each time.
+
+Another improvement would be to separate shelf data from its formatted display so that the View could present the same information in different formats.
+
+### Remaining Limitations
+
+The following items should be checked before the final submission:
+
+- Whether leftover packages are carried over correctly between days
+- Whether denying safe and unsafe packages affects scoring appropriately
+- Whether the priority-processing menu is fully integrated
+- Whether the end-of-day summary displays accurate information
+- Whether invalid shelf positions are handled without exceptions
+- Whether all automated tests run successfully
+
+The timing challenge remains a stretch goal unless it is implemented and tested.
+
+---
 
 ## Next Steps
 
-### What is left to finish the MVP, in order
+### Priority 1 — Complete Model Integration
 
-1. Update `Model.startDay()` so a new day ensures `unprocessedPackages` is filled up to 3 packages while cleanly carrying over leftover packages from the previous day (`Model.startDay`, `Model.calculateScore`).
-2. Add a score effect for denying packages: a penalty for denying a safe package and a small reward for correctly denying an unsafe one (`Model.denyPackage`, `Package.isSafe`). This closes the "deny everything" loophole.
-3. Show a clear end-of-day summary: how many packages were scored and how many are left over (`View`, `Controller.run`).
-4. Decide whether finishing with no stamps should be blocked, and update tests to match.
+**Owner: Sarah**
 
-### Our change feature: priority processing
+- Implement and verify `Model.addPriorityPackage()`.
+- Connect it to `Queue.enqueueFront()`.
+- Add Model tests for priority processing.
+- Verify package carry-over behavior.
+- Verify deny scoring.
+- Check invalid shelf positions and other bad-input cases.
 
-A customer drops off a priority package in person and asks for it to be processed first. The package goes to the **front** of the unprocessed queue instead of the back, so the next package the player processes is the priority one. This turns our queue into a deque and is already described in our scope.
+### Priority 2 — Complete Controller and View Integration
 
-**Predicted to change:**
-- `Queue`: new `enqueueFront(T)` method (and `QueueTest`). `dequeue`, `peek`, `size` and `isEmpty` should not need to change.
-- `Model`: new `addPriorityPackage()`, which makes a package and calls `enqueueFront`. `startProcessing()` should not change, because it already takes the front package.
-- `Controller`: `run()` gets a new menu branch, and the option count passed to `readMenuOption` for the game menu goes from 6 to 7.
-- `View`: `printGameMenu()` gets a new option, and a new `printPriorityArrival()` method announces the arrival.
+**Owner: Max**
 
-**Predicted not to change:** `Package` (a priority package is an ordinary package), `Queue.Node`, `Model.calculateScore`, `Package.gradeStamps`, the shelf methods, and the Model/View separation (the model still never calls the view).
+- Add the priority-processing menu option.
+- Connect the option to `Model.addPriorityPackage()`.
+- Display a priority-package arrival message.
+- Implement or verify the end-of-day summary.
+- Update Controller and View tests.
+- Check invalid menu input.
 
-### Stretch goals
+### Priority 3 — Queue Testing and Verification
 
-- **Committing to:** priority processing, priority shipping, shipments per location, timing challenge
-- **Dropping:** sorting shelves by rule
+**Owner: Nikita**
 
-### New tests needed
+- Implement `Queue.enqueueFront()`.
+- Update Queue tests for priority processing.
+- Verify normal FIFO behavior.
+- Test invalid inputs.
+- Verify interleaved queue operations.
+- Confirm compatibility with Model integration.
 
-- `Queue.enqueueFront`: on an empty queue; on a non-empty queue (new item comes out first, order of the rest unchanged); null returns `false` and changes nothing; mixing `enqueue` and `enqueueFront`; size updates.
-- `Model.addPriorityPackage`: unprocessed count goes up by one, and the next `startProcessing` returns the priority package; works on an empty queue.
-- `Controller`: the new menu letter works, invalid letters beyond it still show the error, and the priority package really is next.
-- `View`: the updated game menu and the arrival message.
-- Bad input: priority arrival when the day is not started, and many priority packages in a row.
+The Queue implementation and test updates have been completed.
 
-### Who does what
+### Priority 4 — Final Integration and Documentation
 
-| Item | Owner |
-| --- | --- |
-| `Queue.enqueueFront` and its tests | Nikita |
-| `Model.addPriorityPackage`, carry-over of leftover packages, deny scoring and their tests | Sarah |
-| `Controller` and `View` changes, end-of-day summary, `ControllerTest` and `ViewTest` updates | Max |
-| Final README update | All |
+**Owners: All Group Members**
+
+- Merge everyone's changes.
+- Run all automated tests.
+- Resolve any remaining failures.
+- Manually test the complete gameplay sequence.
+- Update the README to reflect the final implementation.
+- Confirm class attribution.
+- Rehearse the demonstration.
+
+### Stretch Goals
+
+Our Deliverable 3 plan identified these stretch goals:
+
+| Feature | Plan |
+|---|---|
+| Priority processing | Selected Deliverable 4 change feature |
+| Priority shipping | Verify implementation and tests |
+| Shipments per location | Verify implementation and tests |
+| Timing challenge | Future stretch goal unless completed |
+| Sorting shelves by rule | Dropped |
+
+### Three-Minute Demo Walkthrough
+
+| Time | Action | Presenter |
+|---|---|---|
+| 0:00–0:25 | Introduce Precision Post and MVC architecture | Nikita |
+| 0:25–0:55 | Start a day and inspect a regular package | Max |
+| 0:55–1:30 | Add a priority package and demonstrate queue ordering | Nikita |
+| 1:30–2:05 | Demonstrate package stamping, processing, or denial | Sarah |
+| 2:05–2:35 | Show shelves and end-of-day scoring | Max |
+| 2:35–3:00 | Explain testing, validation, and remaining features | All |
+
+This walkthrough should be rehearsed after all features are integrated.
+
+---
 
 ## Attribution
 
-| File | Who | How |
-| --- | --- | --- |
-| `Queue.java` (includes nested `Node`) | Nikita | Wrote and revised. |
-| `QueueTest.java` | Nikita | Wrote and revised. |
-| `Package.java` | Sarah | Wrote and revised. |
-| `PackageTest.java` | Nikita | Wrote and revised. |
-| `Model.java` | Sarah | Wrote and revised.|
-| `ModelTest.java` | Sarah | Wrote and revised.|
-| `View.java` | Max | Wrote and revised. |
-| `ViewTest.java` | Max | Wrote and revised. GenAI-assisted. |
-| `Controller.java` | Max | Wrote and revised. |
-| `ControllerTest.java` | Max | Wrote and revised. GenAI-assisted. |
+| File | Contributor | Contribution |
+|---|---|---|
+| `Queue.java` (including nested Node) | Nikita | Implemented and revised the linked queue; added priority insertion with `enqueueFront()`. GenAI-assisted. |
+| `QueueTest.java` | Nikita | Added tests for priority processing, invalid inputs, FIFO ordering, and interleaved operations. GenAI-assisted. |
+| `Package.java` | Sarah | Implemented package properties, stamp handling, and grading logic. |
+| `PackageTest.java` | Nikita | Contributed package tests and validation. GenAI-assisted. |
+| `Model.java` | Sarah | Implemented game state, package management, shelves, and scoring. |
+| `ModelTest.java` | Sarah | Developed and revised tests for Model functionality. GenAI-assisted. |
+| `View.java` | Max | Implemented menus, output, and gameplay messages. |
+| `ViewTest.java` | Max | Developed tests for View behavior. GenAI-assisted. |
+| `Controller.java` | Max | Implemented user input, validation, and game flow. |
+| `ControllerTest.java` | Max | Developed tests for Controller behavior. GenAI-assisted. |
+| `README.md` | All | Documented project structure, changes, testing, reflection, and future work. |
 
-### GenAI note
+Each member should verify their attribution before submission.
 
-We used GenAI in 4 ways:
+## GenAI Use
 
-1. **Project name.** We prompted it for game title suggestions and kept "Precision Post".
-2. **Spec review.** We had it review our spec for logic errors and missing MVP functionality.
-3. **View and Controller Tests.** It helped with writing tests for the view and controller which needed to read and write to the console.
-4. **Logic Errors.** We prompted it to find logic errors and updated our code accordingly.
+Our group used generative AI during development in the following ways:
+
+1. **Project naming:** We requested name suggestions and selected Precision Post.
+2. **Specification review:** We asked for help identifying possible logic errors and missing functionality in our original specification.
+3. **Testing:** We used GenAI to help review tests for the Controller, View, Queue, and Package classes.
+4. **Debugging:** We asked for assistance identifying logic errors and improving code behavior.
+5. **Priority processing:** We used ChatGPT to help review `Queue.enqueueFront()` while preserving existing FIFO functionality.
+6. **Queue tests:** We requested tests for priority insertion, null inputs, interleaved operations, and queue reuse. The initial generated tests used JUnit 5, so we revised them to match the project's `student.TestCase` framework.
+7. **Documentation:** We used ChatGPT to help organize the Deliverable 4 reflection, next steps, attribution, and demo plan.
+
+Generated suggestions were reviewed and adapted to the project's design and requirements. Testing in Eclipse was used to check the implementation.
+
+## Final Submission Checklist
+
+- [ ] Queue and QueueTest changes committed and pushed
+- [ ] Model priority-processing integration complete
+- [ ] Controller and View priority-processing integration complete
+- [ ] New feature accessible through gameplay
+- [ ] Normal and invalid-input tests added for core methods
+- [ ] Complete automated test suite passes
+- [ ] README reflects the final code
+- [ ] Reflection and Next Steps updated
+- [ ] Attribution verified by all group members
+- [ ] Three-minute demonstration rehearsed
+- [ ] Repository URL submitted
